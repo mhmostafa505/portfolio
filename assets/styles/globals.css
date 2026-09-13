@@ -2,6 +2,14 @@
 
 @import "tailwindcss";
 
+@theme {
+  --color-primary-white: #ffffe3;
+  --color-primary-bg: #0e100f;
+  --color-primary-hover: #17f1d1;
+  --color-primary-yellow: #ffd074;
+  --color-primary-purple: #a374ff;
+}
+
 html,
 body {
   font-family: "Hanken Grotesk", sans-serif;

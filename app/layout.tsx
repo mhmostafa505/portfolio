@@ -1,17 +1,21 @@
 import "@/assets/styles/globals.css";
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export const metadata = {
+  title: "M.H.Mostafa | Portfolio",
+  description: "Here is a portfolio about me!",
+};
+
+const MainLayout = ({ children }: LayoutProps<"/">) => {
   return (
     <html lang="en">
-      <head>
-        <title>M.H.Mostafa | Portfolio</title>
-      </head>
       <body
-        className="min-h-full flex flex-col bg-[#0E100F]"
+        className="min-h-full flex flex-col bg-primary-bg text-primary-white"
         cz-shortcut-listen="true"
       >
         {children}
       </body>
     </html>
   );
-}
+};
+
+export default MainLayout;
