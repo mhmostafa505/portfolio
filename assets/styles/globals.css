@@ -14,3 +14,162 @@ html,
 body {
   font-family: "Hanken Grotesk", sans-serif;
 }
+
+/* Animations */
+
+/* Navbar */
+@keyframes slide-in-top {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Social Links */
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Hero: Buttons */
+@keyframes riseBounce {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hero: View my work (Project) Button */
+@keyframes glitchTop {
+  0% {
+    opacity: 0.9;
+    transform: translate(2px, -1px);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(-2px, 1px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+}
+@keyframes glitchBot {
+  0% {
+    opacity: 0.9;
+    transform: translate(-2px, 1px);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(2px, -1px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+}
+
+.glitch-label {
+  position: relative;
+}
+.glitch-label::before,
+.glitch-label::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.group:hover .glitch-label::before {
+  color: #ff6b6b;
+  animation: glitchTop 0.35s steps(2) 1;
+}
+.group:hover .glitch-label::after {
+  color: #5fd8ff;
+  animation: glitchBot 0.35s steps(2) 1;
+}
+
+/* Hero: Cycling Text Animation */
+@keyframes dotbounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.3;
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+/* Hero: Floating Text Animation */
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Hero: Frontend Developer Text Animation */
+@keyframes fadeInOnly {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes bracketPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes trackingCollapse {
+  0% {
+    opacity: 0;
+    letter-spacing: 0.5em;
+  }
+  100% {
+    opacity: 1;
+    letter-spacing: normal;
+  }
+}
+@keyframes pulseDot {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(23, 241, 209, 0.5);
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 0 5px rgba(23, 241, 209, 0);
+  }
+}

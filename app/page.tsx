@@ -1,7 +1,7 @@
 "use client";
 import Navbar from "@/components/Navbar";
+import SocialLinks from "@/components/SocialLinks";
 import dynamic from "next/dynamic";
-// import Hero from "@/components/Hero";
 
 const Hero = dynamic(() => import("@/components/Hero"), { ssr: false });
 
@@ -10,6 +10,7 @@ const HomePage = () => {
     <>
       <Navbar />
       <Hero />
+      <SocialLinks />
     </>
   );
 };

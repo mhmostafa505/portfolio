@@ -10,6 +10,48 @@ const ROLES = [
   "Obsessed with performance and clean code",
   "Currently deepening my UI/UX craft",
 ];
+const FLOAT_TAGS = [
+  {
+    text: "Design",
+    color: "#A374FF",
+    border: "#33254F",
+    top: "18%",
+    left: "16%",
+    duration: "4.5s",
+    delay: "0s",
+    url: "https://dictionary.cambridge.org/dictionary/english/design",
+  },
+  {
+    text: "Creativity",
+    color: "#17F1D1",
+    border: "#1E4A46",
+    top: "26%",
+    right: "14%",
+    duration: "5.5s",
+    delay: ".3s",
+    url: "https://dictionary.cambridge.org/dictionary/english/creativity",
+  },
+  {
+    text: "Responsive",
+    color: "#FFD074",
+    border: "#4A3E1E",
+    bottom: "24%",
+    left: "20%",
+    duration: "5s",
+    delay: ".6s",
+    url: "https://dictionary.cambridge.org/dictionary/english/responsive",
+  },
+  {
+    text: "Performance",
+    color: "#ffffe3",
+    border: "#3A3A3A",
+    bottom: "20%",
+    right: "18%",
+    duration: "4.8s",
+    delay: ".2s",
+    url: "https://dictionary.cambridge.org/dictionary/english/performance",
+  },
+];
 
 const SCRAMBLE_CHARS = "!<>-_\\/[]{}—=+*^?#$%&";
 
@@ -18,6 +60,7 @@ const TYPE_SPEED = 45;
 const DELETE_SPEED = 25;
 const HOLD_TIME = 1400;
 const PAUSE_BEFORE_NEXT = 300;
+const DOTS_DURATION = 10;
 
 function randomChar() {
   return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
@@ -36,15 +79,15 @@ const Hero = () => {
   const nameRef = useRef<HTMLHeadingElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Initialize with a scrambled placeholder (same length as NAME) so there's
-  // no blank flash before the decode effect kicks in on mount.
   const [displayName, setDisplayName] = useState(NAME);
   const [nameDecoded, setNameDecoded] = useState(false);
   const [roleText, setRoleText] = useState("");
+  const [hasEntered, setHasEntered] = useState(false);
+  const [showDots, setShowDots] = useState(true);
 
   const hasMounted = useHasMounted();
 
-  /* ---------------- Name: scramble-decode on mount ---------------- */
+  // Name: scramble-decode on mount
   useEffect(() => {
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -87,7 +130,7 @@ const Hero = () => {
     return () => clearInterval(timer);
   }, []);
 
-  /* ---------------- Role line: typewriter, types then deletes then types the next ---------------- */
+  // Role line: typewriter, types then deletes then types the next
   useEffect(() => {
     if (!nameDecoded) return;
 
@@ -131,11 +174,18 @@ const Hero = () => {
       }
     }
 
-    timeoutId = setTimeout(tick, TYPE_SPEED);
-    return () => clearTimeout(timeoutId);
+    const dotsTimer = setTimeout(() => {
+      setShowDots(false);
+      timeoutId = setTimeout(tick, TYPE_SPEED);
+    }, DOTS_DURATION);
+
+    return () => {
+      clearTimeout(dotsTimer);
+      clearTimeout(timeoutId);
+    };
   }, [nameDecoded]);
 
-  /* ---------------- Magnetic letters: nudge nearby letters toward the cursor ---------------- */
+  // Magnetic letters: nudge nearby letters toward the cursor
   useEffect(() => {
     const heroEl = heroRef.current;
     const nameEl = nameRef.current;
@@ -176,7 +226,7 @@ const Hero = () => {
     return () => heroEl.removeEventListener("mousemove", handleMove);
   }, []);
 
-  /* ---------------- Particle constellation background ---------------- */
+  // Particle constellation background
   useEffect(() => {
     const canvas = canvasRef.current;
     const heroEl = heroRef.current;
@@ -287,12 +337,64 @@ const Hero = () => {
     >
       <canvas ref={canvasRef} className="absolute w-full inset-0 z-1" />
 
+      {FLOAT_TAGS.map((tag, index) => (
+        <Link
+          key={tag.text}
+          href={tag.url}
+          target="_blank"
+          className={`${index % 2 === 0 ? "hover:rotate-15" : "hover:-rotate-15"} absolute z-2 whitespace-nowrap rounded-full border px-4 py-1.5 backdrop-blur-[2px] cursor-pointer hover:scale-105 transition-transform duration-150`}
+          style={{
+            color: tag.color,
+            borderColor: tag.border,
+            backgroundColor: "rgba(14,16,15,0.75)",
+            top: tag.top,
+            left: tag.left,
+            right: tag.right,
+            bottom: tag.bottom,
+            animation: `floaty ${tag.duration} ease-in-out infinite`,
+            animationDelay: tag.delay,
+          }}
+        >
+          {tag.text}
+        </Link>
+      ))}
+
       <div className="relative z-3 px-5">
-        <p className="mb-3 text-sm text-neutral-400">{EYEBROW}</p>
+        <Link
+          href="https://www.w3schools.com/whatis/whatis_frontenddev.asp"
+          target="_blank"
+          className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#333] px-3.5 py-1.5 font-mono text-[13px] text-[#ddd] cursor-help hover:text-primary-white"
+        >
+          <span
+            className="h-1.75 w-1.75 rounded-full bg-primary-hover"
+            style={{ animation: "pulseDot 1.8s ease-in-out infinite" }}
+          />
+          <span
+            className="text-primary-hover opacity-0"
+            style={{ animation: "bracketPop 0.3s ease forwards" }}
+          >
+            &lt;
+          </span>
+          <span
+            className="opacity-0"
+            style={{
+              letterSpacing: "0.5em",
+              animation: "trackingCollapse 0.7s ease forwards 0.3s",
+            }}
+          >
+            {EYEBROW}
+          </span>
+          <span
+            className="text-primary-hover opacity-0"
+            style={{ animation: "bracketPop 0.3s ease forwards 0.1s" }}
+          >
+            /&gt;
+          </span>
+        </Link>
 
         <h1
           ref={nameRef}
-          className="mb-4 text-5xl font-bold leading-none text-primary-white sm:text-7xl"
+          className="mb-4 text-5xl font-bold leading-none text-primary-white sm:text-7xl cursor-default"
         >
           {(hasMounted ? displayName : NAME).split("").map((ch, i) => (
             <span
@@ -304,25 +406,95 @@ const Hero = () => {
           ))}
         </h1>
 
-        <div className="mx-auto mb-8 flex min-h-5.5 max-w-lg items-center justify-center gap-0.5 font-mono text-base text-primary-yellow">
-          <span className="h-6">{roleText}</span>
-          <span className="h-4 w-0.5 shrink-0 animate-pulse bg-primary-yellow" />
+        <div className="mx-auto mb-8 flex h-6 max-w-lg items-center justify-center gap-1 font-mono text-base text-primary-yellow">
+          {showDots ? (
+            <span className="inline-flex gap-1.5">
+              <span
+                className="h-1.5 w-1.5 rounded-full bg-primary-yellow"
+                style={{
+                  animation: "dotbounce 1s ease-in-out infinite",
+                  animationDelay: "0s",
+                }}
+              />
+              <span
+                className="h-1.5 w-1.5 rounded-full bg-primary-yellow"
+                style={{
+                  animation: "dotbounce 1s ease-in-out infinite",
+                  animationDelay: "0.15s",
+                }}
+              />
+              <span
+                className="h-1.5 w-1.5 rounded-full bg-primary-yellow"
+                style={{
+                  animation: "dotbounce 1s ease-in-out infinite",
+                  animationDelay: "0.3s",
+                }}
+              />
+            </span>
+          ) : (
+            <>
+              <span>{roleText}</span>
+              <span className="h-4 w-0.5 shrink-0 animate-pulse bg-primary-yellow" />
+            </>
+          )}
         </div>
 
         <div className="flex flex-wrap justify-center gap-3.5">
           <Link
             href="#projects"
-            className="rounded-lg bg-primary-white px-6 py-3 text-sm text-neutral-950 transition-transform hover:-translate-y-0.5"
+            onAnimationEnd={() => setHasEntered(true)}
+            className={`group inline-flex items-center gap-2 rounded-lg bg-primary-white px-6 py-3 text-sm text-primary-bg ${
+              hasEntered
+                ? "opacity-100"
+                : "animate-[riseBounce_0.6s_cubic-bezier(.22,1,.36,1)_forwards] opacity-0"
+            }`}
+            style={{ animationDelay: "400ms" }}
           >
-            View my work
+            <span className="glitch-label" data-text="View my work">
+              View my work
+            </span>
           </Link>
 
-          <a
+          <Link
             href="#"
-            className="rounded-lg border border-primary-white px-6 py-3 text-sm text-primary-white transition-colors hover:border-primary-hover hover:text-primary-hover"
+            download
+            className="group relative inline-flex animate-[riseBounce_0.6s_cubic-bezier(.22,1,.36,1)_forwards] items-center gap-2 rounded-lg border border-primary-white px-6 py-3 text-sm text-primary-white opacity-0 transition-colors hover:border-primary-hover"
+            style={{ animationDelay: "500ms" }}
           >
-            My Resume
-          </a>
+            Download CV
+            <span className="relative h-4 w-4">
+              <svg
+                className="absolute inset-0 transition-all duration-300 ease-out group-hover:translate-y-2.5 group-hover:opacity-0"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M8 2v9M4 8l4 4 4-4"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <svg
+                className="absolute inset-0 -translate-y-1.5 opacity-0 transition-all delay-100 duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M2 10v3a1 1 0 001 1h10a1 1 0 001-1v-3M5 7l3 3 3-3M8 1v8"
+                  stroke="#17F1D1"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+          </Link>
         </div>
       </div>
 
