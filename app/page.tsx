@@ -11,7 +11,9 @@ const HomePage = () => {
     <>
       <Navbar />
       <Hero />
-      <About />
+      <div className="max-w-[77%] mx-auto">
+        <About />
+      </div>
       <SocialLinks />
     </>
   );
