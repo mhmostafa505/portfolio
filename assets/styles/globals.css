@@ -122,7 +122,7 @@ body {
   }
 }
 
-/* Hero: Floating Text Animation */
+/* Hero: Floating Tags Animation */
 @keyframes floaty {
   0%,
   100% {
@@ -130,6 +130,20 @@ body {
   }
   50% {
     transform: translateY(-10px);
+  }
+}
+
+@keyframes burstOut {
+  0% {
+    opacity: 0;
+    transform: translate(var(--fromx), var(--fromy)) scale(0.3);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
   }
 }
 
@@ -142,6 +156,7 @@ body {
     opacity: 1;
   }
 }
+
 @keyframes bracketPop {
   0% {
     opacity: 0;
@@ -152,6 +167,7 @@ body {
     transform: scale(1);
   }
 }
+
 @keyframes trackingCollapse {
   0% {
     opacity: 0;
@@ -162,6 +178,7 @@ body {
     letter-spacing: normal;
   }
 }
+
 @keyframes pulseDot {
   0%,
   100% {
