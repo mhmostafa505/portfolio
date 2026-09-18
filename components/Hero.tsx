@@ -115,7 +115,7 @@ const Hero = () => {
     <section
       id="home"
       ref={heroRef}
-      className="relative flex h-screen flex-col items-center justify-center overflow-hidden text-center bg-primary-bg"
+      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden text-center bg-primary-bg"
     >
       {/* Background */}
       <canvas ref={canvasRef} className="absolute w-full inset-0 z-1" />

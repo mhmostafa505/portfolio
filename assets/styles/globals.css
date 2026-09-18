@@ -190,3 +190,42 @@ body {
     box-shadow: 0 0 0 5px rgba(23, 241, 209, 0);
   }
 }
+
+/* About me: Paragraph Initial Loading */
+.reveal-mask {
+  position: relative;
+  overflow: hidden;
+  display: block;
+}
+
+.reveal-line {
+  display: inline-block;
+  height: 37px;
+  transform: translateY(110%);
+}
+
+.reveal-ready .reveal-line {
+  animation: lineUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.reveal-cover {
+  position: absolute;
+  inset: 0;
+  background: var(--color-primary-purple);
+  transform-origin: left;
+}
+
+.reveal-ready .reveal-cover {
+  animation: wipe 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes lineUp {
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes wipe {
+  to {
+    transform: scaleX(0);
+  }
+}
