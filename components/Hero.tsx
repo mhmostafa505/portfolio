@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useScrollSpy } from "@/contexts/ScrollSpyContext";
 import HeroTitle from "./HeroTitle";
 import HeroFloatingTags from "./HeroFloatingTags";
 import HeroRoles from "./HeroRoles";
@@ -35,6 +36,8 @@ const Hero = () => {
   const [roleText, setRoleText] = useState("");
   const [hasEntered, setHasEntered] = useState(false);
   const [showDots, setShowDots] = useState(true);
+
+  const { registerSection } = useScrollSpy();
 
   const hasMounted = useHasMounted();
 
@@ -114,7 +117,10 @@ const Hero = () => {
   return (
     <section
       id="home"
-      ref={heroRef}
+      ref={(el) => {
+        heroRef.current = el;
+        registerSection("home", el);
+      }}
       className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden text-center bg-primary-bg"
     >
       {/* Background */}

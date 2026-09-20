@@ -8,7 +8,7 @@ export const metadata = {
 
 const MainLayout = ({ children }: LayoutProps<"/">) => {
   return (
-    <html lang="en">
+    <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
       <body
         className="min-h-full flex flex-col bg-primary-bg text-primary-white"
         cz-shortcut-listen="true"

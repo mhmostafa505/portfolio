@@ -1,14 +1,16 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 
-type ScrollSpyValue = {
+interface ScrollSpyValue {
   activeId: string;
   revealed: Set<string>;
-};
+  registerSection: (id: string, el: HTMLElement | null) => void;
+}
 
 const ScrollSpyContext = createContext<ScrollSpyValue>({
   activeId: "home",
   revealed: new Set(),
+  registerSection: () => {},
 });
 
 const HOME_ID = "home";
@@ -23,41 +25,57 @@ export const ScrollSpyProvider = ({
     () => new Set([HOME_ID]),
   );
 
-  useEffect(() => {
-    const sections = document.querySelectorAll("section[id]");
+  const [observer] = useState<IntersectionObserver | null>(() => {
+    if (typeof window === "undefined") return null; // SSR guard
 
-    const observer = new IntersectionObserver(
+    return new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          const id = entry.target.id;
+        const intersecting = entries.filter((e) => e.isIntersecting);
+        if (intersecting.length === 0) return;
 
-          setActiveId(id);
+        const viewportCenter = window.innerHeight / 2;
+        const best = intersecting.reduce((closest, entry) => {
+          const entryCenter =
+            entry.boundingClientRect.top + entry.boundingClientRect.height / 2;
+          const closestCenter =
+            closest.boundingClientRect.top +
+            closest.boundingClientRect.height / 2;
 
-          // clean URL at the top, real hash everywhere else
-          if (id === HOME_ID) {
-            history.replaceState(null, "", window.location.pathname);
-          } else {
-            history.replaceState(null, "", `#${id}`);
-          }
+          return Math.abs(entryCenter - viewportCenter) <
+            Math.abs(closestCenter - viewportCenter)
+            ? entry
+            : closest;
+        });
 
-          setRevealed((prev) => {
-            if (prev.has(id)) return prev; // no change, no re-render
-            const next = new Set(prev);
-            next.add(id);
-            return next;
-          });
+        const id = best.target.id;
+        setActiveId(id);
+        history.replaceState(
+          null,
+          "",
+          id === HOME_ID ? window.location.pathname : `#${id}`,
+        );
+
+        setRevealed((prev) => {
+          if (prev.has(id)) return prev;
+          const next = new Set(prev);
+          next.add(id);
+          return next;
         });
       },
       { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
     );
+  });
 
-    sections.forEach((s) => observer.observe(s));
-    return () => observer.disconnect();
-  }, []);
-
+  // sections call this themselves, whenever they actually mount
+  const registerSection = useCallback(
+    (id: string, el: HTMLElement | null) => {
+      if (!el || !observer) return;
+      observer.observe(el);
+    },
+    [observer],
+  );
   return (
-    <ScrollSpyContext.Provider value={{ activeId, revealed }}>
+    <ScrollSpyContext.Provider value={{ activeId, revealed, registerSection }}>
       {children}
     </ScrollSpyContext.Provider>
   );
