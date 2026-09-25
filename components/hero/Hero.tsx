@@ -2,8 +2,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useScrollSpy } from "@/contexts/ScrollSpyContext";
-import HeroTitle from "./HeroTitle";
 import HeroFloatingTags from "./HeroFloatingTags";
+import HeroTitle from "./HeroTitle";
 import HeroRoles from "./HeroRoles";
 import HeroDownloadCVButton from "./HeroDownloadCVButton";
 import {

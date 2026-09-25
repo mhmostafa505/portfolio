@@ -27,7 +27,7 @@ const Navbar = () => {
       <div
         className={`${
           scrolled
-            ? "bg-black/1 backdrop-blur-lg border-white/20 shadow-lg"
+            ? "bg-black/1 backdrop-blur-md border-white/20 shadow-lg"
             : "bg-transparent border-transparent"
         } flex justify-center items-center gap-5 px-6 py-3 mt-10 text-lg rounded-full border transition-all duration-300 ease-in-out`}
       >

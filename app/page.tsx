@@ -1,8 +1,9 @@
 "use client";
 import Navbar from "@/components/Navbar";
 import SocialLinks from "@/components/SocialLinks";
-import Hero from "@/components/Hero";
-import About from "@/components/About";
+import Hero from "@/components/hero/Hero";
+import About from "@/components/about/About";
+import Experiences from "@/components/experiences/Experiences";
 
 const HomePage = () => {
   return (
@@ -11,6 +12,7 @@ const HomePage = () => {
       <Hero />
       <div className="max-w-[77%] mx-auto">
         <About />
+        <Experiences />
       </div>
       <SocialLinks />
     </>
