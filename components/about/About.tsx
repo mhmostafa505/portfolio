@@ -1,55 +1,39 @@
 "use client";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useScrollSpy } from "@/contexts/ScrollSpyContext";
-import AboutTitle from "./AboutTitle";
 import AboutParagraph from "./AboutParagraph";
 import AboutImage from "./AboutImage";
-import ThreeFlipPills from "../ThreeFlipPills";
-import { aboutContents } from "@/content/aboutContents";
 import AboutButton from "./AboutButton";
+import SectionHeader from "../SectionHeader";
+import { EASE } from "@/content/ease";
+
+const pills = ["#React", "#Front-End", "#Next.js"];
 
 const About = () => {
   const { revealed, registerSection } = useScrollSpy();
   const [activePillsIndex, setActivePillsIndex] = useState<number | null>(null);
 
-  const { pills, EASE } = aboutContents;
-
   const isRevealed = revealed.has("about");
 
-  return (
-    <section
-      id="about"
-      ref={(el) => registerSection("about", el)}
-      className="mt-10 mb-20"
-    >
-      <div className="flex justify-between items-center my-15">
-        {/* Title: wipe-reveal, fires first */}
-        <AboutTitle isRevealed={isRevealed} EASE={EASE} />
+  const setAboutRef = useCallback(
+    (el: HTMLElement | null) => registerSection("about", el),
+    [registerSection],
+  );
 
-        {/* Pills: slide up, staggered, after the title */}
-        <div className="flex items-center gap-12 mr-15">
-          {pills.map((text, i) => (
-            <div
-              key={text}
-              style={{
-                opacity: isRevealed ? 1 : 0,
-                transform: isRevealed ? "translateY(0)" : "translateY(20px)",
-                transition: `all 0.6s ${EASE}`,
-                transitionDelay: `${0.5 + i * 0.12}s`,
-              }}
-            >
-              <ThreeFlipPills
-                key={text}
-                text={text}
-                flipped={activePillsIndex === i}
-                onClick={() =>
-                  setActivePillsIndex((prev) => (prev === i ? null : i))
-                }
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+  return (
+    <section id="about" ref={setAboutRef} className="mt-10 mb-40 scroll-mt-37">
+      {/* Title and Pills */}
+      <SectionHeader
+        pills={pills}
+        isRevealed={isRevealed}
+        EASE={EASE}
+        activePillsIndex={activePillsIndex}
+        setActivePillsIndex={setActivePillsIndex}
+        color="primary-purple"
+        title="About Me"
+        number={1}
+        isReverse={false}
+      />
 
       <div className="flex justify-center items-center gap-10 mb-5">
         <div className="flex flex-col gap-7 w-3/5">

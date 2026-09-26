@@ -4,9 +4,15 @@ interface ThreeFlipPillsProps {
   text: string;
   flipped: boolean;
   onClick: () => void;
+  color: string;
 }
 
-const ThreeFlipPills = ({ text, flipped, onClick }: ThreeFlipPillsProps) => {
+const ThreeFlipPills = ({
+  text,
+  flipped,
+  onClick,
+  color,
+}: ThreeFlipPillsProps) => {
   return (
     <div
       onClick={onClick}
@@ -17,7 +23,9 @@ const ThreeFlipPills = ({ text, flipped, onClick }: ThreeFlipPillsProps) => {
         style={{ transform: flipped ? "rotateX(180deg)" : "rotateX(0deg)" }}
       >
         {/* front: your original line */}
-        <div className="absolute inset-0 bg-primary-purple rounded-full backface-hidden" />
+        <div
+          className={`bg-${color} absolute inset-0 rounded-full backface-hidden`}
+        />
 
         {/* back: just the text, no background */}
         <div

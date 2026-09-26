@@ -1,6 +1,12 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useScrollSpy } from "@/contexts/ScrollSpyContext";
 import HeroFloatingTags from "./HeroFloatingTags";
 import HeroTitle from "./HeroTitle";
@@ -40,6 +46,14 @@ const Hero = () => {
   const { registerSection } = useScrollSpy();
 
   const hasMounted = useHasMounted();
+
+  const setHeroRef = useCallback(
+    (el: HTMLElement | null) => {
+      heroRef.current = el;
+      registerSection("home", el);
+    },
+    [registerSection],
+  );
 
   // Name: scramble-decode on mount
   useEffect(() => {
@@ -117,10 +131,7 @@ const Hero = () => {
   return (
     <section
       id="home"
-      ref={(el) => {
-        heroRef.current = el;
-        registerSection("home", el);
-      }}
+      ref={setHeroRef}
       className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden text-center bg-primary-bg"
     >
       {/* Background */}

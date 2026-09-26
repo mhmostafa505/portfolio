@@ -11,7 +11,7 @@ import { BiMessage } from "react-icons/bi";
 import { navbarItemsContent } from "@/content/navbarContents";
 
 const Navbar = () => {
-  const { activeId } = useScrollSpy();
+  const { activeId, goTo } = useScrollSpy();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -39,6 +39,10 @@ const Navbar = () => {
           >
             <Link
               href={item.url}
+              onClick={(e) => {
+                e.preventDefault();
+                goTo(item.activeIdName);
+              }}
               className={`${activeId === item.activeIdName ? "text-primary-hover" : ""} flex items-center gap-1.5 hover:text-primary-hover`}
             >
               {item.activeIdName === "home" ? (

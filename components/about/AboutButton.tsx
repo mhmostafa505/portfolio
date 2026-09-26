@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { AboutIsRevealedEASEType } from "@/types/aboutTypes";
+import { IsRevealedEASEType } from "@/types/isRevealedEASEType";
 import { FaArrowRightLong } from "react-icons/fa6";
 
-const AboutButton = ({ isRevealed, EASE }: AboutIsRevealedEASEType) => {
+const AboutButton = ({ isRevealed, EASE }: IsRevealedEASEType) => {
   const btnRef = useRef<HTMLButtonElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
 

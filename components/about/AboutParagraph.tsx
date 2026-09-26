@@ -1,8 +1,8 @@
 import AboutSpanFlipText from "./AboutSpanFlipText";
-import AboutRevealCover from "./AboutRevealCover";
-import { AboutIsRevealedEASEType } from "@/types/aboutTypes";
+import { IsRevealedEASEType } from "@/types/isRevealedEASEType";
+import RevealCover from "../RevealCover";
 
-const AboutParagraph = ({ isRevealed, EASE }: AboutIsRevealedEASEType) => {
+const AboutParagraph = ({ isRevealed, EASE }: IsRevealedEASEType) => {
   return (
     <div className="relative overflow-hidden text-[23px]/relaxed">
       <p
@@ -34,7 +34,7 @@ const AboutParagraph = ({ isRevealed, EASE }: AboutIsRevealedEASEType) => {
         tools like Three.js — and who knows, full-stack development might be
         next!
       </p>
-      <AboutRevealCover isRevealed={isRevealed} EASE={EASE} />
+      <RevealCover isRevealed={isRevealed} EASE={EASE} color="primary-purple" />
     </div>
   );
 };

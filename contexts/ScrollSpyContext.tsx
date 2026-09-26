@@ -5,12 +5,14 @@ interface ScrollSpyValue {
   activeId: string;
   revealed: Set<string>;
   registerSection: (id: string, el: HTMLElement | null) => void;
+  goTo: (id: string) => void;
 }
 
 const ScrollSpyContext = createContext<ScrollSpyValue>({
   activeId: "home",
   revealed: new Set(),
   registerSection: () => {},
+  goTo: () => {},
 });
 
 const HOME_ID = "home";
@@ -25,40 +27,50 @@ export const ScrollSpyProvider = ({
     () => new Set([HOME_ID]),
   );
 
+  const [intersecting] = useState<Map<string, DOMRectReadOnly>>(
+    () => new Map(),
+  );
+
   const [observer] = useState<IntersectionObserver | null>(() => {
-    if (typeof window === "undefined") return null; // SSR guard
+    if (typeof window === "undefined") return null;
 
     return new IntersectionObserver(
       (entries) => {
-        const intersecting = entries.filter((e) => e.isIntersecting);
-        if (intersecting.length === 0) return;
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            intersecting.set(entry.target.id, entry.boundingClientRect);
+          } else {
+            intersecting.delete(entry.target.id);
+          }
+        });
+
+        if (intersecting.size === 0) return;
 
         const viewportCenter = window.innerHeight / 2;
-        const best = intersecting.reduce((closest, entry) => {
-          const entryCenter =
-            entry.boundingClientRect.top + entry.boundingClientRect.height / 2;
-          const closestCenter =
-            closest.boundingClientRect.top +
-            closest.boundingClientRect.height / 2;
+        const candidates = Array.from(intersecting.entries());
 
-          return Math.abs(entryCenter - viewportCenter) <
+        const [bestId] = candidates.reduce((closest, current) => {
+          const [, closestRect] = closest;
+          const [, currentRect] = current;
+          const closestCenter = closestRect.top + closestRect.height / 2;
+          const currentCenter = currentRect.top + currentRect.height / 2;
+          return Math.abs(currentCenter - viewportCenter) <
             Math.abs(closestCenter - viewportCenter)
-            ? entry
+            ? current
             : closest;
         });
 
-        const id = best.target.id;
-        setActiveId(id);
+        setActiveId(bestId);
         history.replaceState(
           null,
           "",
-          id === HOME_ID ? window.location.pathname : `#${id}`,
+          bestId === HOME_ID ? window.location.pathname : `#${bestId}`,
         );
 
         setRevealed((prev) => {
-          if (prev.has(id)) return prev;
+          if (prev.has(bestId)) return prev;
           const next = new Set(prev);
-          next.add(id);
+          next.add(bestId);
           return next;
         });
       },
@@ -74,8 +86,50 @@ export const ScrollSpyProvider = ({
     },
     [observer],
   );
+
+  // nav links call this to explicitly declare "the user picked this section"
+  const goTo = useCallback(
+    (id: string) => {
+      const target =
+        id === HOME_ID ? document.body : document.getElementById(id);
+      if (!target) return;
+
+      observer?.disconnect();
+      intersecting.clear();
+
+      setActiveId(id);
+      history.replaceState(
+        null,
+        "",
+        id === HOME_ID ? window.location.pathname : `#${id}`,
+      );
+      setRevealed((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
+
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: id === HOME_ID ? "start" : "start",
+      });
+
+      // resume observing once the scroll has actually settled
+      const resume = () => {
+        document
+          .querySelectorAll("section[id]")
+          .forEach((s) => observer?.observe(s));
+        window.removeEventListener("scrollend", resume);
+      };
+      if ("onscrollend" in window) {
+        window.addEventListener("scrollend", resume, { once: true });
+      } else {
+        setTimeout(resume, 700);
+      }
+    },
+    [observer, intersecting],
+  );
+
   return (
-    <ScrollSpyContext.Provider value={{ activeId, revealed, registerSection }}>
+    <ScrollSpyContext.Provider
+      value={{ activeId, revealed, registerSection, goTo }}
+    >
       {children}
     </ScrollSpyContext.Provider>
   );

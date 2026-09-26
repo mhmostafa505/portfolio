@@ -1,8 +1,8 @@
 import Image from "next/image";
-import { AboutIsRevealedEASEType } from "@/types/aboutTypes";
+import { IsRevealedEASEType } from "@/types/isRevealedEASEType";
 import photo from "@/assets/images/about-me-photo.webp";
 
-const AboutImage = ({ isRevealed, EASE }: AboutIsRevealedEASEType) => {
+const AboutImage = ({ isRevealed, EASE }: IsRevealedEASEType) => {
   return (
     <div
       className="group relative w-103 h-103 rounded-full overflow-hidden border-6 border-primary-hover hover:border-primary-yellow transition-colors duration-500"
