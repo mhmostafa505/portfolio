@@ -7,7 +7,7 @@ import AboutButton from "./AboutButton";
 import SectionHeader from "../SectionHeader";
 import { EASE } from "@/content/ease";
 
-const pills = ["#React", "#Front-End", "#Next.js"];
+const pills = ["#React", "#TypeScript", "#Next.js"];
 
 const About = () => {
   const { revealed, registerSection } = useScrollSpy();

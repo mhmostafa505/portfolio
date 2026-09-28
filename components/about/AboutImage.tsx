@@ -24,7 +24,7 @@ const AboutImage = ({ isRevealed, EASE }: IsRevealedEASEType) => {
       <div
         className="pointer-events-none absolute inset-x-0 h-5 bg-white/60 blur-sm
                -translate-y-10 transition-transform duration-700 ease-in-out
-               group-hover:translate-y-95"
+               group-hover:translate-y-102"
       />
     </div>
   );

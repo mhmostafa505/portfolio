@@ -82,6 +82,8 @@ const Experiences = () => {
   const [dotOffsets, setDotOffsets] = useState<number[]>([]);
   const [visibleCount, setVisibleCount] = useState(0);
   const [isBouncing, setIsBouncing] = useState(true);
+  const [introStarted, setIntroStarted] = useState(false);
+  const [introDone, setIntroDone] = useState(false);
 
   const timelineRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -129,6 +131,8 @@ const Experiences = () => {
 
       const heightPx = fraction * total;
       setIsBouncing(fraction <= CUE_TO_TRAVELER_THRESHOLD);
+      if (fraction > CUE_TO_TRAVELER_THRESHOLD) setIntroDone(true);
+      if (rect.top < vh * 0.85) setIntroStarted(true);
       targetHeightRef.current = heightPx;
 
       setVisibleCount(
@@ -208,9 +212,18 @@ const Experiences = () => {
 
         {/* Scroll-Mouse Pill */}
         <div
-          className={`absolute left-1/2 -translate-x-1/2 z-10 transition-[width,border-radius,border-color,background-color,box-shadow] duration-500 ease-out max-sm:left-5 ${
+          onAnimationEnd={(e) => {
+            if (e.target === e.currentTarget) setIntroDone(true);
+          }}
+          className={`group absolute left-1/2 -translate-x-1/2 z-10 transition-[width,border-radius,border-color,background-color,box-shadow] duration-500 ease-out max-sm:left-5 ${
             isBouncing
-              ? "w-8 h-14 rounded-full border-[1.5px] border-primary-yellow bg-transparent"
+              ? `w-8 h-14 rounded-full border-[1.5px] border-primary-yellow bg-transparent cursor-help  ${
+                  introDone
+                    ? ""
+                    : introStarted
+                      ? "animate-[pillIntro_1.2s_cubic-bezier(.4,0,.2,1)_both]"
+                      : "opacity-0"
+                }`
               : "w-8 h-8 rounded-full border-transparent bg-primary-yellow animate-[neonFlicker_1.4s_ease-in-out_infinite]"
           }`}
           style={{ top: dotTop - 16 }}
@@ -218,12 +231,28 @@ const Experiences = () => {
           {/* the wheel: only meaningful in the pill state, fades out as
               the shell fills in and becomes the solid dot */}
           <div
-            className={`absolute left-1/2 top-2 ml-[-1.5px] h-2.5 w-0.75 rounded-full bg-primary-yellow transition-opacity duration-300 ${
-              isBouncing
-                ? "opacity-100 animate-[wheelBounce_1.6s_ease-in-out_infinite]"
-                : "opacity-0"
+            className={`absolute left-1/2 top-2 ml-[-1.5px] h-2.5 w-0.75 transition-opacity duration-300 ${
+              isBouncing && introDone ? "opacity-100" : "opacity-0"
             }`}
-          />
+          >
+            <div
+              className={`h-full w-full rounded-full bg-primary-yellow ${
+                isBouncing
+                  ? "animate-[wheelBounce_1.6s_ease-in-out_infinite]"
+                  : ""
+              }`}
+            />
+          </div>
+
+          {/* hover tooltip: pill state only. Fades and slides in from the
+          left when the pill is hovered (group-hover) */}
+          {isBouncing && introDone && (
+            <div className="pointer-events-none absolute left-full top-1/2 ml-3 -translate-x-1.5 -translate-y-1/2 whitespace-nowrap rounded-[10px] border border-primary-purple bg-white/5 px-3 py-1.5 text-[0.82rem] font-semibold text-primary-white opacity-0 backdrop-blur-md transition-[opacity,translate] duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+              {/* little arrow pointing back at the pill */}
+              <span className="absolute -left-1.25 top-1/2 -mt-1 h-2 w-2 rotate-45 border-b border-l border-primary-purple bg-[#101312]" />
+              Scroll?
+            </div>
+          )}
         </div>
 
         {/* Experience Cards */}
@@ -283,7 +312,7 @@ const Experiences = () => {
                     `${e.clientY - rect.top}px`,
                   );
                 }}
-                className="group relative inline-block max-w-full overflow-hidden rounded-2xl border-2 border-[#17f1d199] p-5 text-left backdrop-blur-md transition-[border-color,box-shadow,transform] duration-300"
+                className="group relative inline-block max-w-full overflow-hidden rounded-2xl border-2 border-[#17f1d199] p-5 text-left backdrop-blur-md transition-[border-color,box-shadow,translate] duration-300 hover:border-primary-hover hover:shadow-[0_8px_30px_rgba(23,241,209,0.15)] hover:-translate-y-0.5"
                 style={{
                   background: "rgba(255,255,255,0.03)",
                 }}
