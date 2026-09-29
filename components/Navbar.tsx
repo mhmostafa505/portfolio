@@ -43,6 +43,7 @@ const Navbar = () => {
                 e.preventDefault();
                 goTo(item.activeIdName);
               }}
+              data-cursor="pointer"
               className={`${activeId === item.activeIdName ? "text-primary-hover" : ""} flex items-center gap-1.5 hover:text-primary-hover`}
             >
               {item.activeIdName === "home" ? (

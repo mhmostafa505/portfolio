@@ -25,6 +25,7 @@ const HeroFloatingTags = ({ tagRefs }: TagRefType) => {
               e.currentTarget.style.animationDelay = tag.delay;
             }
           }}
+          data-cursor="pointer"
           className={`${index % 2 === 0 ? "hover:rotate-15" : "hover:-rotate-15"} absolute z-2 whitespace-nowrap rounded-full border px-4 py-1.5 opacity-0 backdrop-blur-[2px] cursor-pointer hover:scale-105 transition-transform duration-150`}
           style={{
             color: tag.color,

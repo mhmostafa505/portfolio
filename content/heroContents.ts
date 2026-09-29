@@ -1,4 +1,6 @@
-export const heroContents = {
+import { heroContentsType } from "@/types/heroTypes";
+
+export const heroContents: heroContentsType = {
   NAME: "Mohammad Hossein Mostafa",
   ROLES: [
     "Building interfaces with React & Next.js",

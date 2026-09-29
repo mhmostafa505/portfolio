@@ -7,6 +7,7 @@ const HeroTitle = () => {
     <Link
       href="https://www.w3schools.com/whatis/whatis_frontenddev.asp"
       target="_blank"
+      data-cursor="help"
       className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#333] px-3.5 py-1.5 font-mono text-[13px] text-[#ddd] cursor-help hover:text-primary-white"
     >
       <span

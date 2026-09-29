@@ -32,6 +32,7 @@ const AboutButton = ({ isRevealed, EASE }: IsRevealedEASEType) => {
       <button
         ref={btnRef}
         className="group relative flex items-center justify-center gap-3 bg-transparent text-primary-purple text-center w-2/5 py-4 px-6 rounded-2xl cursor-pointer overflow-hidden"
+        data-cursor="pointer"
         style={{
           opacity: isRevealed ? 1 : 0,
           transitionDelay: "0.9s",

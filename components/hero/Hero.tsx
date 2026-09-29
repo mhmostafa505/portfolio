@@ -167,6 +167,7 @@ const Hero = () => {
           <Link
             href="#projects"
             onAnimationEnd={() => setHasEntered(true)}
+            data-cursor="pointer"
             className={`group inline-flex items-center gap-2 rounded-lg bg-primary-white px-6 py-3 text-sm text-primary-bg ${
               hasEntered
                 ? "opacity-100"

@@ -16,6 +16,7 @@ const ThreeFlipPills = ({
   return (
     <div
       onClick={onClick}
+      data-cursor="help"
       className="w-17 h-4.5 cursor-help perspective-[600px]"
     >
       <div

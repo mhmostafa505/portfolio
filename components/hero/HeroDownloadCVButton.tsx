@@ -5,6 +5,7 @@ const HeroDownloadCVButton = () => {
     <Link
       href="#"
       download
+      data-cursor="pointer"
       className="group relative inline-flex animate-[riseBounce_0.6s_cubic-bezier(.22,1,.36,1)_forwards] items-center gap-2 rounded-lg border border-primary-white px-6 py-3 text-sm text-primary-white opacity-0 transition-colors hover:border-primary-hover"
       style={{ animationDelay: "500ms" }}
     >

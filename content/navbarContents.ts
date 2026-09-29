@@ -1,4 +1,11 @@
-export const navbarItemsContent = [
+interface navbarItemsContentType {
+  url: string;
+  activeIdName: string;
+  name: string;
+  animationDelay: string;
+}
+
+export const navbarItemsContent: navbarItemsContentType[] = [
   {
     url: "#",
     activeIdName: "home",
