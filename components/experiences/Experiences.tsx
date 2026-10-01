@@ -8,12 +8,12 @@ import {
 } from "react";
 import { useScrollSpy } from "@/contexts/ScrollSpyContext";
 import SectionHeader from "../SectionHeader";
-import { experienceContents } from "@/content/experiencesContents";
-import { EASE } from "@/content/ease";
-import { DiffLine } from "@/types/experienceTypes";
-import { updateProgress } from "@/utils/experiencesFunctions";
 import ExperiencesScrollMousePill from "./ExperiencesScrollMousePill";
 import ExperienceCard from "./ExperienceCard";
+import ExperienceCardLogos from "./ExperienceCardLogos";
+import { experienceContents } from "@/content/experiencesContents";
+import { EASE } from "@/content/ease";
+import { updateProgress } from "@/utils/experiencesFunctions";
 
 const pills = ["#BootCamp", "#Brad-Traversy", "#Front-End"];
 
@@ -37,15 +37,9 @@ const Experiences = () => {
   };
 
   // Data Import
-  const { diffPattern, experienceItems, DOT_LERP_FACTOR } = experienceContents;
+  const { experienceItems, DOT_LERP_FACTOR } = experienceContents;
 
   const isRevealed = revealed.has("experiences");
-
-  // Experience Card Hover
-  const diffLines: DiffLine[] = Array.from(
-    { length: 5 },
-    () => diffPattern,
-  ).flat();
 
   const setExperiencesRef = useCallback(
     (el: HTMLElement | null) => registerSection("experiences", el),
@@ -127,7 +121,7 @@ const Experiences = () => {
     <section
       id="experiences"
       ref={setExperiencesRef}
-      className="mt-10 mb-20 scroll-mt-45"
+      className="mt-10 mb-20 scroll-mt-40"
     >
       {/* Title and Pills */}
       <SectionHeader
@@ -175,9 +169,10 @@ const Experiences = () => {
               setItemRef={setItemRef}
               isLeft={isLeft}
               isVisible={isVisible}
-              diffLines={diffLines}
               index={i}
-            />
+            >
+              <ExperienceCardLogos index={i} />
+            </ExperienceCard>
           );
         })}
       </div>

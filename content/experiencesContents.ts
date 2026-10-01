@@ -1,14 +1,6 @@
 import { experienceContentsType } from "@/types/experienceTypes";
 
 export const experienceContents: experienceContentsType = {
-  diffPattern: [
-    { type: "ctx", text: "const items = data.map(x => x.id);" },
-    { type: "rem", text: "fetchLegacy(items);" },
-    { type: "add", text: "await fetchItems(items);" },
-    { type: "ctx", text: "return items;" },
-    { type: "rem", text: "console.log(items);" },
-    { type: "add", text: 'logger.info("items", items);' },
-  ],
   experienceItems: [
     {
       date: "2024",
