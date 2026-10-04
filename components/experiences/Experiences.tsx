@@ -12,13 +12,12 @@ import ExperiencesScrollMousePill from "./ExperiencesScrollMousePill";
 import ExperienceCard from "./ExperienceCard";
 import ExperienceCardLogos from "./ExperienceCardLogos";
 import { experienceContents } from "@/content/experiencesContents";
-import { EASE } from "@/content/ease";
 import { updateProgress } from "@/utils/experiencesFunctions";
 
 const pills = ["#BootCamp", "#Brad-Traversy", "#Front-End"];
 
 const Experiences = () => {
-  const { revealed, registerSection } = useScrollSpy();
+  const { registerSection } = useScrollSpy();
   const [activePillsIndex, setActivePillsIndex] = useState<number | null>(null);
   const [dotTop, setDotTop] = useState(0);
   const [dotOffsets, setDotOffsets] = useState<number[]>([]);
@@ -38,8 +37,6 @@ const Experiences = () => {
 
   // Data Import
   const { experienceItems, DOT_LERP_FACTOR } = experienceContents;
-
-  const isRevealed = revealed.has("experiences");
 
   const setExperiencesRef = useCallback(
     (el: HTMLElement | null) => registerSection("experiences", el),
@@ -126,8 +123,6 @@ const Experiences = () => {
       {/* Title and Pills */}
       <SectionHeader
         pills={pills}
-        isRevealed={isRevealed}
-        EASE={EASE}
         activePillsIndex={activePillsIndex}
         setActivePillsIndex={setActivePillsIndex}
         color="primary-yellow"

@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { IsRevealedEASEType } from "@/types/isRevealedEASEType";
+import useInView from "@/hooks/useInView";
+import { EASE } from "@/content/ease";
 import { FaArrowRightLong } from "react-icons/fa6";
 
-const AboutButton = ({ isRevealed, EASE }: IsRevealedEASEType) => {
+const AboutButton = () => {
+  const [ref, inView] = useInView<HTMLButtonElement>({ threshold: 0.1 });
   const btnRef = useRef<HTMLButtonElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
 
@@ -30,12 +32,15 @@ const AboutButton = ({ isRevealed, EASE }: IsRevealedEASEType) => {
   return (
     <Link href="#contact">
       <button
-        ref={btnRef}
+        ref={(el) => {
+          btnRef.current = el;
+          ref.current = el;
+        }}
         className="group relative flex items-center justify-center gap-3 bg-transparent text-primary-purple text-center w-2/5 py-4 px-6 rounded-2xl cursor-pointer overflow-hidden"
         data-cursor="pointer"
         style={{
-          opacity: isRevealed ? 1 : 0,
-          transitionDelay: "0.9s",
+          opacity: inView ? 1 : 0,
+          transitionDelay: "0.3s",
           transition: "opacity 0.1s",
         }}
       >
@@ -56,9 +61,9 @@ const AboutButton = ({ isRevealed, EASE }: IsRevealedEASEType) => {
               pathLength="100"
               style={{
                 strokeDasharray: 100,
-                strokeDashoffset: isRevealed ? 0 : 100,
+                strokeDashoffset: inView ? 0 : 100,
                 transition: `stroke-dashoffset 0.9s ${EASE}`,
-                transitionDelay: "0.9s",
+                transitionDelay: "0.3s",
               }}
             />
           </svg>
@@ -70,10 +75,10 @@ const AboutButton = ({ isRevealed, EASE }: IsRevealedEASEType) => {
         <span
           className="relative flex items-center gap-3 group-hover:text-primary-bg transition-colors duration-200"
           style={{
-            opacity: isRevealed ? 1 : 0,
-            transform: isRevealed ? "translateY(0)" : "translateY(4px)",
+            opacity: inView ? 1 : 0,
+            transform: inView ? "translateY(0)" : "translateY(4px)",
             transition: `opacity 0.35s ease, transform 0.35s ease`,
-            transitionDelay: "1.7s",
+            transitionDelay: "0.9s",
           }}
         >
           <FaArrowRightLong

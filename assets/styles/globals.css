@@ -348,3 +348,15 @@ body {
       0 0 30px rgba(250, 204, 21, 0.6);
   }
 }
+
+/* My Projects:  */
+@keyframes projIn {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--d) * 24px));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

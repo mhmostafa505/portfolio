@@ -1,10 +1,11 @@
+"use client";
 import SectionTitle from "./SectionTitle";
 import ThreeFlipPills from "./ThreeFlipPills";
+import useInView from "@/hooks/useInView";
+import { EASE } from "@/content/ease";
 
 interface SectionHeaderType {
   pills: string[];
-  EASE: string;
-  isRevealed: boolean;
   activePillsIndex: number | null;
   setActivePillsIndex: React.Dispatch<React.SetStateAction<number | null>>;
   color: string;
@@ -15,8 +16,6 @@ interface SectionHeaderType {
 
 const SectionHeader = ({
   pills,
-  isRevealed,
-  EASE,
   activePillsIndex,
   setActivePillsIndex,
   color,
@@ -24,13 +23,16 @@ const SectionHeader = ({
   number,
   isReverse,
 }: SectionHeaderType) => {
+  const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.9 });
+
   return (
     <div
+      ref={ref}
       className={`flex ${isReverse ? "flex-row-reverse" : ""} justify-between items-center my-15`}
     >
       {/* Title: wipe-reveal, fires first */}
       <SectionTitle
-        isRevealed={isRevealed}
+        inView={inView}
         EASE={EASE}
         color={color}
         title={title}
@@ -43,8 +45,8 @@ const SectionHeader = ({
           <div
             key={text}
             style={{
-              opacity: isRevealed ? 1 : 0,
-              transform: isRevealed ? "translateY(0)" : "translateY(20px)",
+              opacity: inView ? 1 : 0,
+              transform: inView ? "translateY(0)" : "translateY(20px)",
               transition: `all 0.6s ${EASE}`,
               transitionDelay: `${0.5 + i * 0.12}s`,
             }}

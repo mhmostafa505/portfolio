@@ -4,6 +4,7 @@ import SocialLinks from "@/components/SocialLinks";
 import Hero from "@/components/hero/Hero";
 import About from "@/components/about/About";
 import Experiences from "@/components/experiences/Experiences";
+import MyProjects from "@/components/projects/MyProjects";
 
 const HomePage = () => {
   return (
@@ -13,6 +14,7 @@ const HomePage = () => {
       <div className="max-w-[77%] mx-auto">
         <About />
         <Experiences />
+        <MyProjects />
       </div>
       <SocialLinks />
     </>

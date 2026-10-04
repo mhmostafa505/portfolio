@@ -5,15 +5,12 @@ import AboutParagraph from "./AboutParagraph";
 import AboutImage from "./AboutImage";
 import AboutButton from "./AboutButton";
 import SectionHeader from "../SectionHeader";
-import { EASE } from "@/content/ease";
 
 const pills = ["#React", "#TypeScript", "#Next.js"];
 
 const About = () => {
-  const { revealed, registerSection } = useScrollSpy();
+  const { registerSection } = useScrollSpy();
   const [activePillsIndex, setActivePillsIndex] = useState<number | null>(null);
-
-  const isRevealed = revealed.has("about");
 
   const setAboutRef = useCallback(
     (el: HTMLElement | null) => registerSection("about", el),
@@ -25,8 +22,6 @@ const About = () => {
       {/* Title and Pills */}
       <SectionHeader
         pills={pills}
-        isRevealed={isRevealed}
-        EASE={EASE}
         activePillsIndex={activePillsIndex}
         setActivePillsIndex={setActivePillsIndex}
         color="primary-purple"
@@ -38,14 +33,14 @@ const About = () => {
       <div className="flex justify-center items-center gap-10 mb-5">
         <div className="flex flex-col gap-7 w-3/5">
           {/* Paragraph: wipe-reveal, driven by the same isRevealed — no separate observer */}
-          <AboutParagraph isRevealed={isRevealed} EASE={EASE} />
+          <AboutParagraph />
 
           {/* Contact Form Button */}
-          <AboutButton isRevealed={isRevealed} EASE={EASE} />
+          <AboutButton />
         </div>
 
         {/* Photo: fades + scales in last; hover effects untouched */}
-        <AboutImage isRevealed={isRevealed} EASE={EASE} />
+        <AboutImage />
       </div>
     </section>
   );

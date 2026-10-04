@@ -1,13 +1,16 @@
 import AboutSpanFlipText from "./AboutSpanFlipText";
-import { IsRevealedEASEType } from "@/types/isRevealedEASEType";
 import RevealCover from "../RevealCover";
+import useInView from "@/hooks/useInView";
+import { EASE } from "@/content/ease";
 
-const AboutParagraph = ({ isRevealed, EASE }: IsRevealedEASEType) => {
+const AboutParagraph = () => {
+  const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.2 });
+
   return (
-    <div className="relative overflow-hidden text-[23px]/relaxed">
+    <div ref={ref} className="relative overflow-hidden text-[23px]/relaxed">
       <p
         style={{
-          transform: isRevealed ? "translateY(0)" : "translateY(110%)",
+          transform: inView ? "translateY(0)" : "translateY(110%)",
           transition: `transform 0.8s ${EASE}`,
           transitionDelay: "0.3s",
         }}
@@ -34,7 +37,7 @@ const AboutParagraph = ({ isRevealed, EASE }: IsRevealedEASEType) => {
         tools like Three.js — and who knows, full-stack development might be
         next!
       </p>
-      <RevealCover isRevealed={isRevealed} EASE={EASE} color="primary-purple" />
+      <RevealCover inView={inView} EASE={EASE} color="primary-purple" />
     </div>
   );
 };

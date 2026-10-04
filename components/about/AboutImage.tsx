@@ -1,14 +1,18 @@
 import Image from "next/image";
-import { IsRevealedEASEType } from "@/types/isRevealedEASEType";
+import useInView from "@/hooks/useInView";
+import { EASE } from "@/content/ease";
 import photo from "@/assets/images/about-me-photo.webp";
 
-const AboutImage = ({ isRevealed, EASE }: IsRevealedEASEType) => {
+const AboutImage = () => {
+  const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.4 });
+
   return (
     <div
+      ref={ref}
       className="group relative w-103 h-103 rounded-full overflow-hidden border-6 border-primary-hover hover:border-primary-yellow transition-colors duration-500"
       style={{
-        opacity: isRevealed ? 1 : 0,
-        transform: isRevealed ? "scale(1)" : "scale(0.85)",
+        opacity: inView ? 1 : 0,
+        transform: inView ? "scale(1)" : "scale(0.85)",
         transition: `opacity 0.8s ${EASE}, transform 0.8s ${EASE}`,
         transitionDelay: "0.6s",
       }}

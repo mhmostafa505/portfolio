@@ -1,15 +1,16 @@
 import RevealCover from "./RevealCover";
-import { IsRevealedEASEType } from "@/types/isRevealedEASEType";
 import { FaQuoteRight } from "react-icons/fa";
 
-type SectionTitleType = IsRevealedEASEType & {
+interface SectionTitleType {
+  inView: boolean;
+  EASE: string;
   color: string;
   title: string;
   number: number;
-};
+}
 
 const SectionTitle = ({
-  isRevealed,
+  inView,
   EASE,
   color,
   title,
@@ -20,7 +21,7 @@ const SectionTitle = ({
       <h2
         className="relative text-5xl font-black ml-9.5"
         style={{
-          transform: isRevealed ? "translateY(0)" : "translateY(110%)",
+          transform: inView ? "translateY(0)" : "translateY(110%)",
           transition: `transform 0.7s ${EASE}`,
           transitionDelay: "0.1s",
         }}
@@ -34,7 +35,7 @@ const SectionTitle = ({
           className={`text-${color} absolute -top-2 -right-8`}
         />
       </h2>
-      <RevealCover isRevealed={isRevealed} EASE={EASE} color={color} />
+      <RevealCover inView={inView} EASE={EASE} color={color} />
     </div>
   );
 };

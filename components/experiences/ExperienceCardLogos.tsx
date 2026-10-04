@@ -10,6 +10,7 @@ import { MdCss, MdHtml, MdJavascript } from "react-icons/md";
 import { RiNextjsFill, RiTailwindCssFill } from "react-icons/ri";
 import { TbBrandThreejs } from "react-icons/tb";
 import { SiGsap } from "react-icons/si";
+import MagneticIcon from "../MagneticIcon";
 
 const ExperienceCardLogos = ({ index }: { index: number }) => {
   return (
@@ -28,10 +29,9 @@ const ExperienceCardLogos = ({ index }: { index: number }) => {
         </div>
       ) : index === 1 ? (
         // Card 2
-        <BsJavascript
-          size={90}
-          className="absolute top-16 left-3 text-[#F7C43C] hover:-translate-y-1 hover:scale-110 transition-all duration-200"
-        />
+        <MagneticIcon className="absolute top-16 left-3">
+          <BsJavascript size={90} className="text-[#F7C43C]" />
+        </MagneticIcon>
       ) : index === 2 ? (
         // Card 3
         <div>
@@ -62,16 +62,14 @@ const ExperienceCardLogos = ({ index }: { index: number }) => {
         </div>
       ) : index === 3 ? (
         // Card 4
-        <FaTwitter
-          size={100}
-          className="absolute top-16 left-2 text-[#009DED] hover:-translate-y-1 hover:scale-110 transition-all duration-200"
-        />
+        <MagneticIcon className="absolute top-16 left-2">
+          <FaTwitter size={100} className="text-[#009DED]" />
+        </MagneticIcon>
       ) : index === 4 ? (
         // Card 5
-        <RiNextjsFill
-          size={110}
-          className="absolute top-13 -right-2 text-primary-white hover:-translate-y-1 hover:scale-110 transition-all duration-200"
-        />
+        <MagneticIcon className="absolute top-13 -right-2">
+          <RiNextjsFill size={110} className="text-primary-white" />
+        </MagneticIcon>
       ) : index === 5 ? (
         // Card 6
         <svg
@@ -83,27 +81,41 @@ const ExperienceCardLogos = ({ index }: { index: number }) => {
           strokeLinecap="round"
           strokeLinejoin="round"
           xmlns="http://www.w3.org/2000/svg"
-          className="absolute top-8 -left-4 hover:-translate-y-1 hover:scale-110 transition-all duration-200"
+          className="absolute top-8 -left-4"
         >
           {/* S */}
-          <path
-            d="M7 8h-3a1 1 0 0 0 -1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-3"
-            stroke="#4181ED"
-            className="transition-transform duration-200 ease-out hover:-translate-y-1 hover:scale-110 transform-fill origin-center"
-          />
+          <g className="group">
+            <rect x="2" y="7" width="6" height="10" fill="transparent" />
+            <path
+              d="M7 8h-3a1 1 0 0 0 -1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-3"
+              stroke="#4181ED"
+              className="transition-transform duration-200 group-hover:-translate-y-1 group-hover:scale-110 origin-center"
+              style={{ transformBox: "fill-box" }}
+            />
+          </g>
 
           {/* E */}
-          <g className="transition-transform duration-200 ease-out hover:-translate-y-1 hover:scale-110 transform-fill origin-center">
-            <path d="M14 16h-4v-8h4" stroke="#F2B605" />
-            <path d="M11 12h2" stroke="#F2B605" />
+          <g className="group">
+            <rect x="10" y="7" width="5" height="10" fill="transparent" />
+            <g
+              className="transition-transform duration-200 group-hover:-translate-y-1 group-hover:scale-110 origin-center"
+              style={{ transformBox: "fill-box" }}
+            >
+              <path d="M14 16h-4v-8h4" stroke="#F2B605" />
+              <path d="M11 12h2" stroke="#F2B605" />
+            </g>
           </g>
 
           {/* O */}
-          <path
-            d="M17 8m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z"
-            stroke="#E34033"
-            className="transition-transform duration-200 ease-out hover:-translate-y-1 hover:scale-110 transform-fill origin-center"
-          />
+          <g className="group">
+            <rect x="16" y="7" width="6" height="10" fill="transparent" />
+            <path
+              d="M17 8m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z"
+              stroke="#E34033"
+              className="transition-transform duration-200 group-hover:-translate-y-1 group-hover:scale-110 origin-center"
+              style={{ transformBox: "fill-box" }}
+            />
+          </g>
         </svg>
       ) : index === 6 ? (
         // Card 7
