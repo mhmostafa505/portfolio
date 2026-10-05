@@ -28,15 +28,9 @@ export const updateProgress = ({
   const rect = el.getBoundingClientRect();
   const vh = window.innerHeight;
   const total = rect.height;
-  const doc = document.documentElement;
-
-  const maxScrollY = doc.scrollHeight - vh;
-  const scrollRemaining = maxScrollY - window.scrollY;
-  const rectTopAtPageEnd = rect.top - scrollRemaining;
 
   const scrolledNow = Math.max(vh * TRIGGER - rect.top, 0);
-  const scrolledAtEnd = Math.max(vh * TRIGGER - rectTopAtPageEnd, 0);
-
+  const scrolledAtEnd = total;
   const fraction =
     scrolledAtEnd > 0 ? Math.min(scrolledNow / scrolledAtEnd, 1) : 1;
 

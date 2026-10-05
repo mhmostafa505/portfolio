@@ -1,4 +1,7 @@
 import { myProjectsContentsType } from "@/types/myProjectsTypes";
+import ecommerceImg from "@/assets/images/e-commerce-img.webp";
+import twitterDemoImg from "@/assets/images/twitter-demo-img.webp";
+import taskManagerImg from "@/assets/images/task-manager-img.webp";
 
 export const myProjectsContents: myProjectsContentsType = {
   themes: {
@@ -33,6 +36,7 @@ export const myProjectsContents: myProjectsContentsType = {
   projects: [
     {
       name: "E-Commerce",
+      image: twitterDemoImg,
       type: "Full-stack web app",
       description:
         "A short story about what this project does, why you built it and what problem it solves.",
@@ -43,6 +47,7 @@ export const myProjectsContents: myProjectsContentsType = {
     },
     {
       name: "Twitter-Demo",
+      image: taskManagerImg,
       type: "Social media clone",
       description:
         "Describe the features, your role and the result. Real numbers make it more convincing.",
@@ -53,6 +58,7 @@ export const myProjectsContents: myProjectsContentsType = {
     },
     {
       name: "TaskManager",
+      image: ecommerceImg,
       type: "Productivity app",
       description:
         "Explain what the app does, who it is for, and what you learned while building it.",

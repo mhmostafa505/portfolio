@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   useCallback,
   useEffect,
@@ -11,6 +12,7 @@ import {
 import { useScrollSpy } from "@/contexts/ScrollSpyContext";
 import SectionHeader from "../SectionHeader";
 import { myProjectsContents } from "@/content/myProjectsContents";
+import { handleSelect, onScroll } from "@/utils/myProjectsFunctions";
 import { FaGithub } from "react-icons/fa";
 import { FiExternalLink } from "react-icons/fi";
 
@@ -18,10 +20,25 @@ const pills = ["#E-Commerce", "#Twitter-Demo", "#TaskManager"];
 
 const SCROLL_LOCK = true;
 const SCROLL_PER_PROJECT = 60; // vh of scrolling each project gets
-const STICKY_TOP = 140; // px, same value as the "scroll-mt-35" on the section
 const WHEEL_GAP = 64; // px between the names in the drum wheel
+const BOX_MAX_HEIGHT = 620;
+const BOX_GAP = 100; // px always kept free above and below the box while pinned
+const GAP_ABOVE = 30; // px between the header and the box before it pins
+const GAP_BELOW = 0; // px between the box and the next section after it unpins
+
+const BOX_HEIGHT = `min(${BOX_MAX_HEIGHT}px, 100svh - ${BOX_GAP * 2}px)`;
+const SPARE = `(100svh - ${BOX_HEIGHT}) / 2`; // empty space above/below the box inside the pinned stage
 
 const pad = (n: number) => String(n).padStart(2, "0");
+
+// Data Import
+const { themes, projects } = myProjectsContents;
+
+// Pixels of scrolling each project gets, read from the real layout
+const getStep = (track: HTMLElement | null, stage: HTMLElement | null) =>
+  track && stage
+    ? (track.offsetHeight - stage.offsetHeight) / projects.length
+    : 0;
 
 const MyProjects = () => {
   const { registerSection } = useScrollSpy();
@@ -29,6 +46,7 @@ const MyProjects = () => {
   const [active, setActive] = useState({ index: 0, direction: 1 });
 
   const trackRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const navTarget = useRef<number | null>(null);
   const navTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -37,8 +55,6 @@ const MyProjects = () => {
     [registerSection],
   );
 
-  const { themes, projects } = myProjectsContents;
-
   const project = projects[active.index];
   const theme = themes[project.color];
 
@@ -46,35 +62,16 @@ const MyProjects = () => {
   useEffect(() => {
     if (!SCROLL_LOCK) return;
 
-    const onScroll = () => {
-      const track = trackRef.current;
-      if (!track) return;
-
-      const step = (window.innerHeight * SCROLL_PER_PROJECT) / 100;
-      const progress = (STICKY_TOP - track.getBoundingClientRect().top) / step;
-      const index = Math.max(
-        0,
-        Math.min(projects.length - 1, Math.floor(progress)),
-      );
-
-      // A click started a smooth scroll: ignore the projects we pass on the way
-      if (navTarget.current !== null) {
-        if (navTimer.current) clearTimeout(navTimer.current);
-        if (index === navTarget.current) {
-          navTarget.current = null;
-        } else {
-          navTimer.current = setTimeout(() => {
-            navTarget.current = null;
-          }, 200);
-        }
-        return;
-      }
-
-      setActive((prev) =>
-        prev.index === index
-          ? prev
-          : { index, direction: index > prev.index ? 1 : -1 },
-      );
+    const handleScroll = () => {
+      onScroll({
+        trackRef,
+        getStep,
+        stageRef,
+        projects,
+        navTarget,
+        navTimer,
+        setActive,
+      });
     };
 
     // User takes over the scroll -> back to normal behavior
@@ -82,49 +79,23 @@ const MyProjects = () => {
       navTarget.current = null;
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    // Capture the timer that exists when this effect finishes.
+    const timer = navTimer.current;
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("wheel", cancelNav, { passive: true });
     window.addEventListener("touchstart", cancelNav, { passive: true });
-    onScroll();
+    handleScroll();
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("wheel", cancelNav);
       window.removeEventListener("touchstart", cancelNav);
-      if (navTimer.current) clearTimeout(navTimer.current);
+      if (timer) {
+        clearTimeout(timer);
+      }
     };
-  }, [projects]);
-
-  // Click on a project name
-  const handleSelect = (index: number) => {
-    if (index === active.index) return; // same project: nothing to do
-
-    const direction = index > active.index ? 1 : -1;
-
-    if (!SCROLL_LOCK || !trackRef.current) {
-      setActive({ index, direction });
-      return;
-    }
-
-    const step = (window.innerHeight * SCROLL_PER_PROJECT) / 100;
-
-    navTarget.current = index;
-    if (navTimer.current) clearTimeout(navTimer.current);
-    navTimer.current = setTimeout(() => {
-      navTarget.current = null;
-    }, 1500);
-
-    setActive({ index, direction }); // show the target right away, no flash of the ones in between
-    window.scrollTo({
-      top:
-        window.scrollY +
-        trackRef.current.getBoundingClientRect().top -
-        STICKY_TOP +
-        index * step +
-        step / 2,
-      behavior: "smooth",
-    });
-  };
+  }, []);
 
   return (
     <section
@@ -149,23 +120,23 @@ const MyProjects = () => {
         style={
           SCROLL_LOCK
             ? {
-                height: `calc(100vh - ${STICKY_TOP}px + ${projects.length * SCROLL_PER_PROJECT}vh)`,
+                height: `calc(100svh + ${projects.length * SCROLL_PER_PROJECT}svh)`,
+                marginTop: `calc(${GAP_ABOVE}px - ${SPARE})`,
+                marginBottom: `calc(${GAP_BELOW}px - ${SPARE})`,
+                overflowAnchor: "none",
               }
             : undefined
         }
       >
         {/* Sticky stage: stays pinned while the projects change */}
         <div
-          className={`flex items-center justify-center px-3 py-4 md:px-6 ${SCROLL_LOCK ? "sticky" : ""}`}
-          style={
-            SCROLL_LOCK
-              ? { top: STICKY_TOP, height: `calc(100vh - ${STICKY_TOP}px)` }
-              : undefined
-          }
+          ref={stageRef}
+          className={`pointer-events-none flex items-center justify-center px-3 md:px-6 ${SCROLL_LOCK ? "sticky top-0 h-svh" : "py-6"}`}
         >
           {/* Main Project Box */}
           <div
-            className={`relative grid h-155 max-h-[calc(100vh-9rem)] w-full max-w-5xl grid-rows-[48px_1fr] overflow-hidden rounded-xl border border-primary-white/10 bg-primary-bg shadow-[0_24px_70px_-28px] transition-shadow duration-500 ${theme.glow}`}
+            className={`pointer-events-auto relative grid w-full max-w-5xl grid-rows-[48px_1fr] overflow-hidden rounded-xl border border-primary-white/10 bg-primary-bg shadow-[0_24px_70px_-28px] transition-shadow duration-500 ${theme.glow}`}
+            style={{ height: BOX_HEIGHT }}
           >
             {/* Browser bar: dots, project type, counter */}
             <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-primary-white/10 bg-primary-white/3 px-3 font-mono text-[11px] tracking-widest text-primary-white/55 md:grid-cols-[1fr_minmax(0,340px)_1fr] md:px-4">
@@ -176,14 +147,14 @@ const MyProjects = () => {
               </div>
 
               <div className="flex items-center justify-center gap-2 truncate rounded-full bg-primary-white/6 px-4 py-1.5 text-xs tracking-wide text-primary-white">
-                <span className={`text-[10px] transition-colors ${theme.text}`}>
+                <span className={`${theme.text} text-[10px] transition-colors`}>
                   ●
                 </span>
                 {project.type}
               </div>
 
               <div className="justify-self-end uppercase">
-                <span className="text-primary-hover">
+                <span className={`${theme.text} transition-colors`}>
                   {pad(active.index + 1)}
                 </span>{" "}
                 / {pad(projects.length)}
@@ -206,7 +177,20 @@ const MyProjects = () => {
                     <button
                       key={item.name}
                       type="button"
-                      onClick={() => handleSelect(i)}
+                      onClick={() =>
+                        // Click on a project name
+                        handleSelect({
+                          index: i,
+                          active,
+                          SCROLL_LOCK,
+                          trackRef,
+                          setActive,
+                          getStep,
+                          stageRef,
+                          navTarget,
+                          navTimer,
+                        })
+                      }
                       style={{
                         transform: `translateY(calc(-50% + ${offset * WHEEL_GAP}px)) translateX(${distance * distance * -8}px) scale(${1 - distance * 0.14})`,
                         opacity: Math.max(0, 1 - distance * 0.42),
@@ -243,15 +227,14 @@ const MyProjects = () => {
                   <div
                     className={`relative grid h-25 shrink-0 place-items-center overflow-hidden rounded-md border text-2xl font-bold tracking-tight md:h-37.5 md:text-4xl ${theme.text} ${theme.border} ${theme.tint}`}
                   >
-                    <div
-                      className="absolute inset-0 opacity-35"
-                      style={{
-                        backgroundImage:
-                          "radial-gradient(currentColor 1px, transparent 1px)",
-                        backgroundSize: "16px 16px",
-                      }}
+                    <Image
+                      src={project.image}
+                      alt={project.name}
+                      fill
+                      sizes="(min-width: 768px) 600px, 100vw"
+                      className="object-contain"
                     />
-                    <span className="relative">{project.name}</span>
+                    {/* <span className="relative">{project.name}</span> */}
                   </div>
 
                   <h3 className="text-2xl font-bold tracking-tight text-primary-white md:text-3xl">

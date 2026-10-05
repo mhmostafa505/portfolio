@@ -36,7 +36,7 @@ const ExperiencesScrollMousePill = ({
     >
       {/* Scroll-Mouse Wheel */}
       <div
-        className={`absolute left-1/2 top-2 ml-[-1.5px] h-2.5 w-0.75 transition-opacity duration-300 ${
+        className={`absolute left-1/2 top-2.25 ml-[-1.5px] h-2.5 w-0.75 transition-opacity duration-300 ${
           isBouncing && introDone ? "opacity-100" : "opacity-0"
         }`}
       >
