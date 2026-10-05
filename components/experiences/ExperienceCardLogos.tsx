@@ -37,15 +37,15 @@ const ExperienceCardLogos = ({ index }: { index: number }) => {
         <div>
           <MdHtml
             size={65}
-            className="absolute top-12 -right-3 text-primary-purple hover:-translate-y-1 hover:scale-110 transition-all duration-200"
+            className="absolute top-12 -right-3 w-fit text-primary-purple hover:-translate-y-1 hover:scale-110 transition-all duration-200"
           />
           <MdCss
             size={65}
-            className="absolute top-18 right-15 text-primary-hover hover:-translate-y-1 hover:scale-110 transition-all duration-200"
+            className="absolute top-18 right-16 w-fit text-primary-hover hover:-translate-y-1 hover:scale-110 transition-all duration-200"
           />
           <MdJavascript
             size={65}
-            className="absolute top-26 right-2 text-primary-yellow hover:-translate-y-1 hover:scale-110 transition-all duration-200"
+            className="absolute top-26 right-2 w-fit text-primary-yellow hover:-translate-y-1 hover:scale-110 transition-all duration-200"
           />
           <FaReact
             size={55}

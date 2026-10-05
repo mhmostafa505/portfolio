@@ -82,7 +82,7 @@ const ExperienceCard = ({
             <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-primary-yellow">
               {item.date}
             </div>
-            <h3 className="mb-1 text-base font-semibold text-primary-white">
+            <h3 className="mb-1 text-lg font-semibold text-primary-white">
               {item.title}
             </h3>
             <div className="mb-2 text-sm text-primary-purple">{item.role}</div>
