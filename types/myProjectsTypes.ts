@@ -5,7 +5,7 @@ export type ThemeColor = "primary-hover" | "primary-yellow" | "primary-purple";
 
 export interface Project {
   name: string;
-  image: StaticImageData;
+  image?: StaticImageData;
   type: string;
   description: string;
   stack: string[];
