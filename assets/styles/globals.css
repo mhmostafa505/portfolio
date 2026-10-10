@@ -9,6 +9,7 @@
   --color-primary-yellow: #ffd074;
   --color-primary-purple: #a374ff;
 
+  /* Project In Animation */
   --animate-project-in: project-in 0.4s ease;
   @keyframes project-in {
     from {
@@ -20,6 +21,24 @@
       transform: none;
     }
   }
+
+  /* Float Button Hover Animation
+  --animate-float: float 1.7s ease-in-out infinite;
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-3px) rotate(-2deg);
+    }
+    50% {
+      transform: translateY(-6px) rotate(0deg);
+    }
+    75% {
+      transform: translateY(-3px) rotate(2deg);
+    }
+  } */
 }
 
 html,
@@ -433,5 +452,63 @@ body {
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* My Projects: Float Button Hover Animation */
+@property --float-a {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* The animation only turns a phase angle. The movement is calculated from it. */
+@keyframes float-phase {
+  to {
+    --float-a: 360deg;
+  }
+}
+
+.float-hover {
+  --float-amp: 6px; /* how high it floats */
+  --float-tilt: 1.5deg; /* how much it sways */
+  animation: float-phase 2.4s linear infinite;
+  translate: 0 calc(var(--float-amp) * -0.5 * (1 - cos(var(--float-a))));
+  rotate: calc(var(--float-tilt) * sin(var(--float-a)));
+  transition:
+    color 0.15s,
+    background-color 0.15s,
+    border-color 0.15s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float-hover {
+    animation: none;
+    translate: none;
+    rotate: none;
+  }
+}
+
+/* My Projects: Live demo text wave (same 2.4s cycle as the GitHub float) */
+@keyframes text-wave {
+  0%,
+  40%,
+  100% {
+    translate: 0 0;
+  }
+  20% {
+    translate: 0 -4px;
+  }
+}
+
+.wave-letter {
+  display: inline-block;
+  animation: text-wave 2.4s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 70ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wave-letter {
+    animation: none;
   }
 }

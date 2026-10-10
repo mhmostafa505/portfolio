@@ -10,9 +10,9 @@ const HeroDownloadCVButton = () => {
       style={{ animationDelay: "500ms" }}
     >
       Download CV
-      <span className="relative h-4 w-4">
+      <span className="relative h-4 w-4 overflow-hidden">
         <svg
-          className="absolute inset-0 transition-all duration-300 ease-out group-hover:translate-y-2.5 group-hover:opacity-0"
+          className="absolute inset-0 transition-transform duration-300 ease-out group-hover:translate-y-full"
           width="16"
           height="16"
           viewBox="0 0 16 16"
@@ -27,7 +27,7 @@ const HeroDownloadCVButton = () => {
           />
         </svg>
         <svg
-          className="absolute inset-0 -translate-y-1.5 opacity-0 transition-all delay-100 duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100"
+          className="absolute inset-0 -translate-y-full transition-transform duration-300 ease-out group-hover:translate-y-0"
           width="16"
           height="16"
           viewBox="0 0 16 16"

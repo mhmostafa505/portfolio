@@ -1,17 +1,8 @@
 import {
-  Project,
-  ScrollHandleSelectFunctionsUsableTypes,
+  OnScrollFunctionType,
+  HandleSelectFunctionType,
+  HandleMagnetMoveFunctionType,
 } from "@/types/myProjectsTypes";
-
-interface onScrollFunctionType extends ScrollHandleSelectFunctionsUsableTypes {
-  projects: Project[];
-}
-
-interface handleSelectFunctionType extends ScrollHandleSelectFunctionsUsableTypes {
-  index: number;
-  active: { index: number; direction: number };
-  SCROLL_LOCK: boolean;
-}
 
 export const onScroll = ({
   trackRef,
@@ -21,7 +12,7 @@ export const onScroll = ({
   navTarget,
   navTimer,
   setActive,
-}: onScrollFunctionType) => {
+}: OnScrollFunctionType) => {
   const track = trackRef.current;
   if (!track) return;
 
@@ -64,7 +55,7 @@ export const handleSelect = ({
   stageRef,
   navTarget,
   navTimer,
-}: handleSelectFunctionType) => {
+}: HandleSelectFunctionType) => {
   if (index === active.index) return;
 
   const direction = index > active.index ? 1 : -1;
@@ -91,4 +82,50 @@ export const handleSelect = ({
       step / 2,
     behavior: "smooth",
   });
+};
+
+// Magnet Function Stack Tags: pull every stack tag toward the mouse, stronger the closer it is
+export const handleMagnetMove = ({
+  e,
+  stackRef,
+  MAGNET,
+  MAGNET_RADIUS,
+  MAGNET_PULL,
+}: HandleMagnetMoveFunctionType) => {
+  if (!MAGNET || !stackRef.current) return;
+
+  for (const wrapper of Array.from(
+    stackRef.current.children,
+  ) as HTMLElement[]) {
+    const tag = wrapper.firstElementChild as HTMLElement | null;
+    if (!tag) continue;
+
+    // The wrapper never moves, so the distance is always measured from the tag's resting spot
+    const rect = wrapper.getBoundingClientRect();
+    const dx = e.clientX - (rect.left + rect.width / 2);
+    const dy = e.clientY - (rect.top + rect.height / 2);
+    const distance = Math.hypot(dx, dy) || 1;
+    const pull =
+      distance < MAGNET_RADIUS
+        ? (1 - distance / MAGNET_RADIUS) * MAGNET_PULL
+        : 0;
+
+    tag.style.transform = pull
+      ? `translate(${(dx / distance) * pull}px, ${(dy / distance) * pull}px)`
+      : "";
+  }
+};
+
+// Magnet Function Stack Tags: reset magnetic effect on hover
+export const resetMagnet = (
+  stackRef: React.RefObject<HTMLDivElement | null>,
+) => {
+  if (!stackRef.current) return;
+
+  for (const wrapper of Array.from(
+    stackRef.current.children,
+  ) as HTMLElement[]) {
+    const tag = wrapper.firstElementChild as HTMLElement | null;
+    if (tag) tag.style.transform = "";
+  }
 };

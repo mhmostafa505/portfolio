@@ -26,18 +26,28 @@ const HeroFloatingTags = ({ tagRefs }: TagRefType) => {
             }
           }}
           data-cursor="pointer"
-          className={`${index % 2 === 0 ? "hover:rotate-15" : "hover:-rotate-15"} absolute z-2 whitespace-nowrap rounded-full border px-4 py-1.5 opacity-0 backdrop-blur-[2px] cursor-pointer hover:scale-105 transition-transform duration-150`}
+          className={`group absolute z-2 whitespace-nowrap opacity-0 cursor-pointer`}
           style={{
-            color: tag.color,
-            borderColor: tag.border,
-            backgroundColor: "rgba(14,16,15,0.75)",
             top: tag.top,
             left: tag.left,
             right: tag.right,
             bottom: tag.bottom,
           }}
         >
-          {tag.text}
+          <span
+            className={`${
+              index % 2 === 0
+                ? "group-hover:rotate-15"
+                : "group-hover:-rotate-15"
+            } block rounded-full border px-4 py-1.5 backdrop-blur-[2px] transition-transform duration-150 group-hover:scale-105`}
+            style={{
+              color: tag.color,
+              borderColor: tag.border,
+              backgroundColor: "rgba(14,16,15,0.75)",
+            }}
+          >
+            {tag.text}
+          </span>
         </Link>
       ))}
     </>
