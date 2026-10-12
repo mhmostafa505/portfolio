@@ -33,18 +33,18 @@ const MyProjectsItemDetails = ({
     >
       {/* Cover Image */}
       <div
-        className={`${theme.text} ${theme.border} ${theme.tint} group relative grid h-25 shrink-0 place-items-center overflow-hidden rounded-md border text-2xl font-bold tracking-tight md:h-37.5 md:text-4xl`}
+        className={`${theme.text} ${theme.border} ${theme.tint} group relative flex h-25 shrink-0 items-start justify-center overflow-hidden rounded-md pt-4 border text-2xl font-bold tracking-tight md:h-37.5 md:text-4xl`}
       >
         {project.image ? (
           <Image
             src={project.image}
             alt={project.name}
-            fill
-            sizes="(min-width: 768px) 600px, 100vw"
-            className="object-contain group-hover:scale-110 group-hover:rotate-6 group-hover:translate-y-10 transition-all duration-200 ease-in-out"
+            sizes="(min-width: 768px) 460px, 60vw"
+            quality={90}
+            className="h-auto w-[88%] rounded-t-xl md:w-[78%] group-hover:-rotate-2 group-hover:scale-105 transition-transform duration-200"
           />
         ) : (
-          <span className="relative">{project.name}</span>
+          <span className="relative self-center">{project.name}</span>
         )}
       </div>
 

@@ -146,19 +146,26 @@ const ShapeCursor = () => {
       vis = 0,
       lastMove = 0;
     const curCol = [23, 241, 209];
-    let W = window.innerWidth,
-      H = window.innerHeight,
-      dpr = 1;
+    let W = 0,
+      H = 0,
+      dpr = 1,
+      offX = 0,
+      offY = 0;
 
     const fit = () => {
       dpr = window.devicePixelRatio || 1;
-      W = window.innerWidth;
-      H = window.innerHeight;
+      const rect = canvas!.getBoundingClientRect();
+      W = rect.width;
+      H = rect.height;
+      offX = rect.left;
+      offY = rect.top;
       canvas!.width = Math.round(W * dpr);
       canvas!.height = Math.round(H * dpr);
     };
+
     fit();
-    window.addEventListener("resize", fit);
+    const ro = new ResizeObserver(() => fit());
+    ro.observe(canvas);
 
     const setShape = (name: ShapeName) => {
       if (name === head.name) return;
@@ -190,8 +197,8 @@ const ShapeCursor = () => {
     };
 
     const onMove = (e: MouseEvent) => {
-      const nx = e.clientX,
-        ny = e.clientY;
+      const nx = e.clientX - offX,
+        ny = e.clientY - offY;
       if (Math.hypot(nx - mx, ny - my) > 0.6) lastMove = performance.now();
       mx = nx;
       my = ny;
@@ -287,10 +294,8 @@ const ShapeCursor = () => {
     let frameId = 0;
     const frame = (now: number) => {
       vis += ((inside ? 1 : 0) - vis) * 0.16;
-      hx += (mx - hx) * 0.55;
-      hy += (my - hy) * 0.55;
-      if (Math.abs(mx - hx) < 0.05) hx = mx;
-      if (Math.abs(my - hy) < 0.05) hy = my;
+      hx = mx;
+      hy = my;
 
       let tx = hx,
         ty = hy;
@@ -375,7 +380,7 @@ const ShapeCursor = () => {
     frameId = requestAnimationFrame(frame);
 
     return () => {
-      window.removeEventListener("resize", fit);
+      ro.disconnect();
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseover", onOver);
       document.documentElement.removeEventListener("mouseleave", onLeaveWindow);
