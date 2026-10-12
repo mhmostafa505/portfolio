@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { type CSSProperties } from "react";
+import { useLiveIcon } from "@/hooks/useLiveDemoIcon";
 import {
   MyProjectsContentsType,
   Project,
@@ -22,6 +23,8 @@ const MyProjectsItemDetails = ({
   theme,
   stackRef,
 }: MyProjectsItemDetailsType) => {
+  const { iconRef, playIcon, rewindIcon } = useLiveIcon(project.name);
+
   return (
     <div
       key={project.name}
@@ -70,29 +73,41 @@ const MyProjectsItemDetails = ({
 
       {/* Links: Github & Live Demo */}
       <div className="mt-auto flex flex-wrap justify-end gap-2.5">
+        {/* Live Demo */}
         {project.live && (
-          <Link
-            href={project.live}
+          <div
+            onMouseEnter={playIcon}
+            onMouseLeave={rewindIcon}
             data-cursor="pointer"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Live demo"
-            className={`${theme.bg} inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold text-primary-bg transition hover:-translate-y-0.5`}
+            className="group flex"
           >
-            <span aria-hidden="true">
-              {"Live demo".split("").map((char, i) => (
-                <span
-                  key={i}
-                  className="wave-letter"
-                  style={{ "--i": i } as CSSProperties}
-                >
-                  {char === " " ? "\u00A0" : char}
-                </span>
-              ))}
-            </span>{" "}
-            <FiExternalLink />
-          </Link>
+            <Link
+              href={project.live}
+              data-cursor="pointer"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Live demo"
+              className={`${theme.bg} inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold text-primary-bg group-hover:-translate-y-0.5 group-hover:scale-105 transition-all duration-700 ease-in-out`}
+            >
+              <span aria-hidden="true">
+                {"Live demo".split("").map((char, i) => (
+                  <span
+                    key={i}
+                    className="wave-letter"
+                    style={{ "--i": i } as CSSProperties}
+                  >
+                    {char === " " ? "\u00A0" : char}
+                  </span>
+                ))}
+              </span>{" "}
+              <span ref={iconRef} aria-hidden="true" className="inline-flex">
+                <FiExternalLink />
+              </span>
+            </Link>
+          </div>
         )}
+
+        {/* Github */}
         <div data-cursor="pointer" className="group flex">
           <Link
             href={project.github}

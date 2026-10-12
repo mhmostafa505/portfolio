@@ -60,7 +60,7 @@ const MyProjectsListItem = ({
       }}
       className={`intro-item absolute top-1/2 left-3.5 right-2 flex h-14 origin-left cursor-pointer items-center gap-1.5 text-left text-[15px] font-semibold tracking-tight transition-[transform,opacity,color] duration-500 md:left-7 md:right-3 md:gap-3 md:text-[27px] ${
         i === active.index
-          ? themes[item.color].text
+          ? `${themes[item.color].text} hover:translate-x-1 transition-transform duration-100`
           : "text-primary-white/55 hover:text-primary-white"
       }`}
     >
