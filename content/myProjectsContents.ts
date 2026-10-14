@@ -1,7 +1,22 @@
 import { MyProjectsContentsType } from "@/types/myProjectsTypes";
-import ecommerceImg from "@/assets/images/e-commerce-img.webp";
 import twitterDemoImg from "@/assets/images/twitter-demo-img.webp";
+import twitterDemoLoginImg from "@/assets/images/twitter-demo-login.webp";
+import twitterDemoProfileImg from "@/assets/images/twitter-demo-profile.webp";
+import twitterDemoEditProfileImg from "@/assets/images/twitter-demo-edit-profile.webp";
+import twitterDemoCommentImg from "@/assets/images/twitter-demo-comment.webp";
+import ecommerceImg from "@/assets/images/e-commerce-img.webp";
+import ecommerceHomeImg from "@/assets/images/e-commerce-home.webp";
+import ecommerceShopImg from "@/assets/images/e-commerce-shop.webp";
+import ecommerceLoginImg from "@/assets/images/e-commerce-login.webp";
+import ecommerceCheckoutImg from "@/assets/images/e-commerce-checkout.webp";
+import ecommerceCreateProductImg from "@/assets/images/e-commerce-create-product.webp";
+import ecommerceShoppingProgressImg from "@/assets/images/e-commerce-shopping-progress.webp";
 import taskManagerImg from "@/assets/images/task-manager-img.webp";
+import taskManagerLandingHeaderImg from "@/assets/images/task-manager-landing-header.webp";
+import taskManagerLandingFeaturesImg from "@/assets/images/task-manager-landing-features.webp";
+import taskManagerLandingCommentsImg from "@/assets/images/task-manager-landing-comments.webp";
+import taskManagerAboutUsImg from "@/assets/images/task-manager-about-us.webp";
+import taskManagerContactUsImg from "@/assets/images/task-manager-contact-us.webp";
 
 export const myProjectsContents: MyProjectsContentsType = {
   themes: {
@@ -50,6 +65,13 @@ export const myProjectsContents: MyProjectsContentsType = {
       github: "https://github.com/Soroush-Eghdami/Tweeter_Demo",
       live: "https://vercel-two-tau-13.vercel.app/",
       color: "primary-hover",
+      gallery: [
+        { src: twitterDemoImg, title: "Home" },
+        { src: twitterDemoLoginImg, title: "Login" },
+        { src: twitterDemoProfileImg, title: "User Profile" },
+        { src: twitterDemoEditProfileImg, title: "Edit Profile" },
+        { src: twitterDemoCommentImg, title: "Comment Page" },
+      ],
     },
     {
       name: "Task Manager",
@@ -61,6 +83,14 @@ export const myProjectsContents: MyProjectsContentsType = {
       github: "https://github.com/mhmostafa505/Quera-Bootcamp-Project-01",
       live: "",
       color: "primary-yellow",
+      gallery: [
+        { src: taskManagerImg, title: "Home" },
+        { src: taskManagerLandingHeaderImg, title: "Landing Header" },
+        { src: taskManagerLandingFeaturesImg, title: "Landing Features" },
+        { src: taskManagerLandingCommentsImg, title: "Landing Comments" },
+        { src: taskManagerAboutUsImg, title: "About Us" },
+        { src: taskManagerContactUsImg, title: "Contact Us" },
+      ],
     },
     {
       name: "E-Commerce",
@@ -79,6 +109,15 @@ export const myProjectsContents: MyProjectsContentsType = {
       github: "https://github.com/mhmostafa505/Quera-Bootcamp-Project-02",
       live: "",
       color: "primary-purple",
+      gallery: [
+        { src: ecommerceImg, title: "Product Page" },
+        { src: ecommerceHomeImg, title: "Home" },
+        { src: ecommerceShopImg, title: "Shop" },
+        { src: ecommerceLoginImg, title: "Login" },
+        { src: ecommerceCheckoutImg, title: "Checkout" },
+        { src: ecommerceCreateProductImg, title: "Create Product" },
+        { src: ecommerceShoppingProgressImg, title: "Shopping Progress" },
+      ],
     },
   ],
   SCROLL_LOCK: true,

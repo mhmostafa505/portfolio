@@ -1,14 +1,16 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
-import { type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useLiveIcon } from "@/hooks/useLiveDemoIcon";
+import MyProjectsGallery from "./MyProjectsGallery";
 import {
   MyProjectsContentsType,
   Project,
   ThemeColor,
 } from "@/types/myProjectsTypes";
 import { FaGithub } from "react-icons/fa";
-import { FiExternalLink } from "react-icons/fi";
+import { FiExternalLink, FiMaximize2 } from "react-icons/fi";
 
 interface MyProjectsItemDetailsType {
   project: Project;
@@ -24,6 +26,47 @@ const MyProjectsItemDetails = ({
   stackRef,
 }: MyProjectsItemDetailsType) => {
   const { iconRef, playIcon, rewindIcon } = useLiveIcon(project.name);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [asleep, setAsleep] = useState(false);
+
+  const coverRef = useRef<HTMLButtonElement>(null);
+  const pointer = useRef({ x: -1, y: -1 });
+
+  // the gallery photos: your gallery, or just the cover if there is none
+  const images = project.gallery?.length
+    ? project.gallery
+    : project.image
+      ? [{ src: project.image, title: project.name }]
+      : [];
+
+  // remember where the mouse is while the gallery is open
+  useEffect(() => {
+    if (!galleryOpen) return;
+    const move = (e: PointerEvent) => {
+      pointer.current = { x: e.clientX, y: e.clientY };
+    };
+
+    window.addEventListener("pointermove", move, { passive: true });
+
+    return () => window.removeEventListener("pointermove", move);
+  }, [galleryOpen]);
+
+  // Open Gallery
+  const openGallery = (e: React.MouseEvent) => {
+    if (e.detail > 0) pointer.current = { x: e.clientX, y: e.clientY };
+    setGalleryOpen(true);
+  };
+
+  // Close Gallery
+  const closeGallery = () => {
+    // mouse still over the cover? then keep it asleep until the mouse leaves
+    const r = coverRef.current?.getBoundingClientRect();
+    const { x, y } = pointer.current;
+    setAsleep(
+      !!r && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom,
+    );
+    setGalleryOpen(false);
+  };
 
   return (
     <div
@@ -32,8 +75,20 @@ const MyProjectsItemDetails = ({
       className="animate-project-in flex h-full flex-col gap-4"
     >
       {/* Cover Image */}
-      <div
-        className={`${theme.text} ${theme.border} ${theme.tint} group relative flex h-25 shrink-0 items-start justify-center overflow-hidden rounded-md pt-4 border text-2xl font-bold tracking-tight md:h-37.5 md:text-4xl`}
+      <button
+        ref={coverRef}
+        type="button"
+        data-cursor="pointer"
+        disabled={!images.length}
+        onClick={openGallery}
+        onMouseLeave={() => setAsleep(false)}
+        aria-label={`Open ${project.name} gallery`}
+        className={`${theme.text} ${theme.border} ${theme.tint} ${asleep ? "is-asleep" : ""} cover-frame relative flex h-25 w-full shrink-0 items-start justify-center overflow-hidden rounded-md pt-4 border text-2xl font-bold tracking-tight md:h-37.5 md:text-4xl`}
+        style={{
+          backgroundImage:
+            "radial-gradient(color-mix(in srgb, currentColor 35%, transparent) 1px, transparent 1px)",
+          backgroundSize: "16px 16px",
+        }}
       >
         {project.image ? (
           <Image
@@ -41,12 +96,23 @@ const MyProjectsItemDetails = ({
             alt={project.name}
             sizes="(min-width: 768px) 460px, 60vw"
             quality={90}
-            className="h-auto w-[88%] rounded-t-xl md:w-[78%] group-hover:-rotate-2 group-hover:scale-105 transition-transform duration-200"
+            className="wake-img h-auto w-[88%] rounded-t-xl md:w-[78%]"
           />
         ) : (
           <span className="relative self-center">{project.name}</span>
         )}
-      </div>
+
+        {/* Photo Count Chip */}
+        {images.length > 1 && (
+          <span
+            aria-hidden="true"
+            className={`${theme.text} ${theme.border} cover-hint pointer-events-none absolute right-2.5 bottom-2 inline-flex items-center gap-1.5 rounded-full border bg-primary-bg/80 px-2.5 py-1 font-mono text-[10.5px] tracking-wider`}
+          >
+            <FiMaximize2 size={11} />
+            {images.length} photos
+          </span>
+        )}
+      </button>
 
       {/* Title */}
       <h3 className="text-2xl font-bold tracking-tight text-primary-white md:text-3xl">
@@ -120,6 +186,17 @@ const MyProjectsItemDetails = ({
           </Link>
         </div>
       </div>
+
+      {/* Image Gallery */}
+      {galleryOpen && (
+        <MyProjectsGallery
+          images={images}
+          projectName={project.name}
+          theme={theme}
+          originRef={coverRef}
+          onClose={closeGallery}
+        />
+      )}
     </div>
   );
 };

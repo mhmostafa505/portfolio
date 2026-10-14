@@ -4,6 +4,11 @@ import type { StaticImageData } from "next/image";
 
 export type ThemeColor = "primary-hover" | "primary-yellow" | "primary-purple";
 
+export interface GalleryImage {
+  src: StaticImageData;
+  title: string;
+}
+
 export interface Project {
   name: string;
   image?: StaticImageData;
@@ -13,6 +18,7 @@ export interface Project {
   github: string;
   live: string; // leave "" to hide the "Live demo" button
   color: ThemeColor;
+  gallery?: GalleryImage[];
 }
 
 export interface MyProjectsContentsType {

@@ -1,6 +1,6 @@
 import MyProjectsBrowserBar from "./MyProjectsBrowserBar";
+import MyProjectsItemDetails from "./MyProjectsItemDetails";
 import MyProjectsListItem from "./MyProjectsListItem";
-import MyProjectsItemDetails from "./MyProjectItemDetails";
 import { MyProjectsMainBoxType } from "@/types/myProjectsTypes";
 
 const MyProjectsMainBox = ({

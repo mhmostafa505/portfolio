@@ -23,6 +23,10 @@
   }
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 html,
 body {
   font-family: "Hanken Grotesk", sans-serif;
@@ -492,5 +496,62 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .wave-letter {
     animation: none;
+  }
+}
+
+/* My Projects: project image wake up hover animation */
+.wake-img {
+  transform-origin: 50% 100%;
+  transition:
+    filter 0.55s ease,
+    transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (hover: hover) {
+  .wake-img {
+    filter: grayscale(1) brightness(0.55);
+  }
+  .cover-frame:hover .wake-img {
+    filter: none;
+    transform: scale(1.02);
+  }
+  /* right after the gallery closes: stay asleep until the mouse leaves */
+  .cover-frame.is-asleep:hover .wake-img {
+    filter: grayscale(1) brightness(0.55);
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cover-frame:hover .wake-img {
+    transform: none;
+  }
+}
+
+/* My Projects: gallery photo number counter */
+.cover-hint {
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.cover-frame:hover .cover-hint {
+  opacity: 1;
+  transform: none;
+}
+
+/* after the gallery closes, stay hidden together with the image */
+.cover-frame.is-asleep:hover .cover-hint {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+/* touch screens have no hover, so always show it */
+@media (hover: none) {
+  .cover-hint {
+    opacity: 1;
+    transform: none;
   }
 }
