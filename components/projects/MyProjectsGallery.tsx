@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import {
   useCallback,
   useEffect,
@@ -14,13 +14,22 @@ import {
   MyProjectsContentsType,
   ThemeColor,
 } from "@/types/myProjectsTypes";
-import { FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
+import {
+  FiChevronLeft,
+  FiChevronRight,
+  FiX,
+  FiZoomIn,
+  FiZoomOut,
+} from "react-icons/fi";
 
 const OPEN_MS = 600; // circle wipe in
 const CLOSE_MS = 520; // circle wipe out
 const OPEN_EASE = "cubic-bezier(.55,0,.2,1)";
 const CLOSE_EASE = "cubic-bezier(.6,0,.4,1)";
 const SLIDE_GAP = 28; // px between photos in the film strip
+const LENS = true; // false removes the magnifier
+const LENS_SIZE = 230; // px
+const LENS_ZOOM = 1.5; // how much it magnifies
 
 interface MyProjectsGalleryType {
   images: GalleryImage[];
@@ -32,11 +41,17 @@ interface MyProjectsGalleryType {
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-const getSlideWidth = () =>
-  Math.max(
-    240,
-    Math.min(960, window.innerWidth * 0.9, (window.innerHeight - 236) * 1.6),
-  );
+const getMaxBox = () => ({
+  w: Math.min(960, window.innerWidth * 0.9),
+  h: Math.max(160, window.innerHeight - 236),
+});
+
+// biggest box with the image's own ratio that fits inside max
+const fit = (img: StaticImageData, max: { w: number; h: number }) => {
+  const ratio = img.width / img.height;
+  const w = Math.min(max.w, max.h * ratio);
+  return { w, h: w / ratio };
+};
 
 const MyProjectsGallery = ({
   images,
@@ -46,7 +61,12 @@ const MyProjectsGallery = ({
   onClose,
 }: MyProjectsGalleryType) => {
   const [index, setIndex] = useState(0);
-  const [width, setWidth] = useState(getSlideWidth);
+  const [zoom, setZoom] = useState(false);
+  const [prevIndex, setPrevIndex] = useState(index);
+  const [canHover] = useState(
+    () => window.matchMedia("(hover: hover)").matches,
+  );
+  const [max, setMax] = useState(getMaxBox);
   const [reduce] = useState(
     () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
@@ -58,10 +78,40 @@ const MyProjectsGallery = ({
   const pending = useRef(false); // close requested while still opening
   const touchX = useRef<number | null>(null);
   const onCloseRef = useRef(onClose);
+  const lensRef = useRef<HTMLSpanElement>(null);
 
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  });
+  const lensOn = LENS && canHover; // the magnifier only exists on devices with a mouse
+
+  // leaving a photo turns the zoom off (done during render, so no effect is needed)
+  if (prevIndex !== index) {
+    setPrevIndex(index);
+    setZoom(false);
+  }
+
+  const sizes = images.map((img) => fit(img.src, max));
+  const centers = sizes.map(
+    (s, i) =>
+      sizes.slice(0, i).reduce((sum, p) => sum + p.w + SLIDE_GAP, 0) + s.w / 2,
+  );
+
+  const moveLens = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    w: number,
+    h: number,
+  ) => {
+    const lens = lensRef.current;
+    if (!lens) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width) * w;
+    const y = ((e.clientY - r.top) / r.height) * h;
+    lens.style.opacity = "1";
+    lens.style.transform = `translate(${x - LENS_SIZE / 2}px, ${y - LENS_SIZE / 2}px)`;
+    lens.style.backgroundPosition = `${LENS_SIZE / 2 - x * LENS_ZOOM}px ${LENS_SIZE / 2 - y * LENS_ZOOM}px`;
+  };
+
+  const hideLens = () => {
+    if (lensRef.current) lensRef.current.style.opacity = "0";
+  };
 
   const step = useCallback(
     (d: number) =>
@@ -84,6 +134,10 @@ const MyProjectsGallery = ({
       `circle(${R}px at ${x}px ${y}px)`,
     ] as const;
   }, [originRef]);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   /* hidden before the first paint, so there is no flash */
   useLayoutEffect(() => {
@@ -230,7 +284,7 @@ const MyProjectsGallery = ({
   }, [close, step, images.length]);
 
   useEffect(() => {
-    const onResize = () => setWidth(getSlideWidth());
+    const onResize = () => setMax(getMaxBox());
 
     window.addEventListener("resize", onResize);
 
@@ -319,7 +373,7 @@ const MyProjectsGallery = ({
           <div
             style={{
               gap: SLIDE_GAP,
-              transform: `translateX(${-(index * (width + SLIDE_GAP) + width / 2)}px)`,
+              transform: `translateX(${-centers[index]}px)`,
               transition: reduce
                 ? "none"
                 : "transform 650ms cubic-bezier(.65,0,.35,1)",
@@ -329,43 +383,101 @@ const MyProjectsGallery = ({
             {/* Project Images */}
             {images.map((img, i) => {
               const on = i === index;
+              const s = sizes[i];
+
               return (
-                <button
+                <div
                   key={img.title}
-                  type="button"
-                  onClick={() => setIndex(i)}
-                  aria-label={`Photo ${i + 1}: ${img.title}`}
-                  aria-current={on}
-                  data-cursor={on ? undefined : "pointer"}
+                  className={`${theme.text} ${theme.border} pointer-events-auto relative shrink-0 rounded-xl border`}
                   style={{
-                    width,
+                    width: s.w,
+                    height: s.h,
                     transform: on ? "none" : "scale(.8)",
+                    boxShadow: on
+                      ? "0 0 70px -8px color-mix(in srgb, currentColor 55%, transparent)"
+                      : "0 0 0 0 transparent",
                     transition: reduce
                       ? "none"
-                      : "transform 600ms cubic-bezier(.3,1.2,.5,1)",
+                      : "transform 600ms cubic-bezier(.3,1.2,.5,1), box-shadow 400ms",
                   }}
-                  className={`${on ? `shadow-2xl ${theme.glow}` : ""} pointer-events-auto relative aspect-16/10 shrink-0 overflow-hidden rounded-xl border border-primary-white/10`}
                 >
-                  <Image
-                    src={img.src}
-                    alt={img.title}
-                    fill
-                    sizes="(min-width: 1024px) 960px, 90vw"
-                    quality={85}
-                    loading="eager"
-                    draggable={false}
-                    className="object-contain"
-                  />
-                  {/* dim the neighbors with an overlay (smoother than a filter) */}
-                  <span
-                    aria-hidden="true"
-                    style={{
-                      opacity: on ? 0 : 0.6,
-                      transition: "opacity 400ms",
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      if (!on) return setIndex(i);
+                      if (!lensOn) return;
+                      if (zoom) {
+                        hideLens();
+                        setZoom(false);
+                      } else {
+                        setZoom(true);
+                        if (e.detail > 0) moveLens(e, s.w, s.h); // show the lens right where you clicked
+                      }
                     }}
-                    className="absolute inset-0 bg-[#0b0d0c]"
-                  />
-                </button>
+                    onPointerMove={
+                      on && lensOn
+                        ? (e) => zoom && moveLens(e, s.w, s.h)
+                        : undefined
+                    }
+                    onPointerLeave={on && lensOn ? hideLens : undefined}
+                    aria-label={`Photo ${i + 1}: ${img.title}`}
+                    aria-current={on}
+                    aria-pressed={on && lensOn ? zoom : undefined}
+                    data-cursor={on && !lensOn ? undefined : "pointer"}
+                    className={`${on && lensOn ? (zoom ? "cursor-zoom-out" : "cursor-zoom-in") : ""} absolute inset-0 overflow-hidden rounded-xl ring-1 ring-primary-white/10`}
+                  >
+                    <Image
+                      src={img.src}
+                      alt={img.title}
+                      fill
+                      sizes={`${Math.round(s.w)}px`}
+                      quality={85}
+                      loading="eager"
+                      draggable={false}
+                      className="object-contain"
+                    />
+                    {/* dim the neighbors with an overlay */}
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        opacity: on ? 0 : 0.6,
+                        transition: "opacity 400ms",
+                      }}
+                      className="absolute inset-0 bg-[#0b0d0c]"
+                    />
+
+                    {/* Hint: tells the user the photo can be zoomed */}
+                    {on && lensOn && (
+                      <span
+                        aria-hidden="true"
+                        className={`${theme.text} pointer-events-none absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full border border-current bg-primary-bg/80 px-3 py-1.5 font-mono text-[11px] tracking-wider`}
+                      >
+                        {zoom ? (
+                          <FiZoomOut size={13} />
+                        ) : (
+                          <FiZoomIn size={13} />
+                        )}
+                        {zoom ? "Click to exit zoom" : "Click to zoom"}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* Magnifier Hover Effect */}
+                  {on && lensOn && (
+                    <span
+                      ref={lensRef}
+                      aria-hidden="true"
+                      style={{
+                        width: LENS_SIZE,
+                        height: LENS_SIZE,
+                        backgroundImage: `url(${img.src.src})`,
+                        backgroundSize: `${s.w * LENS_ZOOM}px ${s.h * LENS_ZOOM}px`,
+                        backgroundRepeat: "no-repeat",
+                      }}
+                      className="pointer-events-none absolute top-0 left-0 rounded-full border-2 border-current bg-[#0b0d0c] opacity-0 shadow-xl shadow-black/60 transition-opacity duration-150"
+                    />
+                  )}
+                </div>
               );
             })}
           </div>

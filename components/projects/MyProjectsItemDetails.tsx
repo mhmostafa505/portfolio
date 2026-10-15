@@ -106,7 +106,7 @@ const MyProjectsItemDetails = ({
         {images.length > 1 && (
           <span
             aria-hidden="true"
-            className={`${theme.text} ${theme.border} cover-hint pointer-events-none absolute right-2.5 bottom-2 inline-flex items-center gap-1.5 rounded-full border bg-primary-bg/80 px-2.5 py-1 font-mono text-[10.5px] tracking-wider`}
+            className={`${theme.text} ${theme.border} cover-hint pointer-events-none absolute right-2.5 bottom-2 inline-flex items-center gap-1.5 rounded-full border bg-primary-bg/80 px-2.5 py-2 font-mono text-[10.5px] tracking-wider`}
           >
             <FiMaximize2 size={11} />
             {images.length} photos
