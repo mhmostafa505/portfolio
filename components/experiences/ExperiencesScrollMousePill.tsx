@@ -20,7 +20,7 @@ const ExperiencesScrollMousePill = ({
       onAnimationEnd={(e) => {
         if (e.target === e.currentTarget) setIntroDone(true);
       }}
-      data-cursor="help"
+      data-cursor={isBouncing ? "help" : "default"}
       className={`group absolute left-1/2 -translate-x-1/2 z-10 transition-[width,border-radius,border-color,background-color,box-shadow] duration-500 ease-out max-sm:left-5 ${
         isBouncing
           ? `w-8 h-14 rounded-full border-[1.5px] border-primary-yellow bg-transparent cursor-help  ${

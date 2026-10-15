@@ -1,7 +1,15 @@
 "use client";
 import { useEffect, useRef } from "react";
 
-type ShapeName = "dot" | "pointer" | "help" | "text";
+type ShapeName = "dot" | "pointer" | "help" | "text" | "zoomIn" | "zoomOut";
+
+interface ShapeDef {
+  A: Float32Array;
+  B: Float32Array;
+  w: number;
+  fill: boolean;
+  outline: number;
+}
 
 const HAND =
   "M6.75 1a.75.75 0 0 1 .75.75V8a.5.5 0 0 0 1 0V5.467l.086-.004c.317-.012.637-.008.816.027.134.027.294.096.448.182.077.042.15.147.15.314V8a.5.5 0 0 0 1 0V6.435l.106-.01c.316-.024.584-.01.708.04.118.046.3.207.486.43.081.096.15.19.2.259V8.5a.5.5 0 1 0 1 0v-1h.342a1 1 0 0 1 .995 1.1l-.271 2.715a2.5 2.5 0 0 1-.317.991l-1.395 2.442a.5.5 0 0 1-.434.252H6.118a.5.5 0 0 1-.447-.276l-1.232-2.465-2.512-4.185a.517.517 0 0 1 .809-.631l2.41 2.41A.5.5 0 0 0 6 9.5V1.75A.75.75 0 0 1 6.75 1M8.5 4.466V1.75a1.75 1.75 0 1 0-3.5 0v6.543L3.443 6.736A1.517 1.517 0 0 0 1.07 8.588l2.491 4.153 1.215 2.43A1.5 1.5 0 0 0 6.118 16h6.302a1.5 1.5 0 0 0 1.302-.756l1.395-2.441a3.5 3.5 0 0 0 .444-1.389l.271-2.715a2 2 0 0 0-1.99-2.199h-.581a5 5 0 0 0-.195-.248c-.191-.229-.51-.568-.88-.716-.364-.146-.846-.132-1.158-.108l-.132.012a1.26 1.26 0 0 0-.56-.642 2.6 2.6 0 0 0-.738-.288c-.31-.062-.739-.058-1.05-.046Z";
@@ -11,6 +19,10 @@ const HELP = "M -5.5 -6 C -5.5 -11 5.5 -11 5.5 -6 C 5.5 -2 0 -2.5 0 2.5";
 const HELPDOT = "M 0 8 A 0.9 0.9 0 1 1 0 9.8 A 0.9 0.9 0 1 1 0 8 Z";
 const TEXT = "M -4 -11 L 4 -11 L 0 -11 L 0 11 L -4 11 L 4 11";
 const CIRCLE = "M 0 -3.4 A 3.4 3.4 0 1 1 0 3.4 A 3.4 3.4 0 1 1 0 -3.4 Z";
+const LENS =
+  "M 11 11 L 4.596 4.596 A 6.5 6.5 0 0 0 -4.596 -4.596 A 6.5 6.5 0 0 0 4.596 4.596";
+const PLUS = "M -3 0 L 3 0 L 0 0 L 0 -3 L 0 3";
+const MINUS = "M -3 0 L 3 0";
 
 const COL: Record<ShapeName, [number[], number[]]> = {
   dot: [
@@ -29,6 +41,14 @@ const COL: Record<ShapeName, [number[], number[]]> = {
     [23, 241, 209],
     [163, 116, 255],
   ],
+  zoomIn: [
+    [23, 241, 209],
+    [163, 116, 255],
+  ],
+  zoomOut: [
+    [255, 208, 116],
+    [163, 116, 255],
+  ],
 };
 
 const N = 90; // points sampled per shape outline
@@ -37,18 +57,26 @@ const FOLLOW = 0.3;
 const SETTLE = 0.06;
 const DUR = 220; // ms, shape morph duration
 const IDLE_FADE = 160; // ms, how fast the trail disappears once you stop
+const DARK = "#0e100f";
+const DIST_MIN = 100; // lower = outline appears less often
+const CONTRAST_MIN = 1.6; // lower = outline appears less often
+const FALLBACK_BG = [14, 16, 15];
+const MEDIA = new Set(["IMG", "VIDEO", "CANVAS", "PICTURE"]);
+const HALO_MS = 300; // how long the outline takes to draw in or out
+
+let sctx: CanvasRenderingContext2D | null = null;
+
+let halo = 0,
+  haloTarget = 0,
+  lastBgCheck = 0,
+  cX = 0,
+  cY = 0;
+
+let lastFrame = 0;
 
 const ease = (t: number) => {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 };
-
-interface ShapeDef {
-  A: Float32Array;
-  B: Float32Array;
-  w: number;
-  fill: boolean;
-  outline: number;
-}
 
 const ShapeCursor = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -117,6 +145,8 @@ const ShapeCursor = () => {
       pointer: makeShape(HAND, null, 1.18, 1, -6.75, -4, true, 0.2),
       help: makeShape(HELP, HELPDOT, 0.75, 2.1, 0, -2, false, 0),
       text: makeShape(TEXT, null, 0.7, 2, 0, 0, false, 0),
+      zoomIn: makeShape(LENS, PLUS, 1.05, 2.2, 0, 0, false, 0),
+      zoomOut: makeShape(LENS, MINUS, 1.05, 2.2, 0, 0, false, 0),
     };
 
     const head = {
@@ -180,6 +210,7 @@ const ShapeCursor = () => {
       head.t0 = performance.now();
       head.name = name;
       head.fill = SH[name].fill;
+      lastBgCheck = 0;
     };
 
     const TEXT_FIELDS =
@@ -197,6 +228,8 @@ const ShapeCursor = () => {
     };
 
     const onMove = (e: MouseEvent) => {
+      cX = e.clientX;
+      cY = e.clientY;
       const nx = e.clientX - offX,
         ny = e.clientY - offY;
       if (Math.hypot(nx - mx, ny - my) > 0.6) lastMove = performance.now();
@@ -215,11 +248,19 @@ const ShapeCursor = () => {
     };
     const onOver = (e: MouseEvent) => {
       setShape(resolveShape(e.target));
+      lastBgCheck = 0;
     };
     const onLeaveWindow = () => {
       inside = false;
     };
+    const onScroll = () => {
+      lastBgCheck = 0;
+    };
 
+    window.addEventListener("scroll", onScroll, {
+      passive: true,
+      capture: true,
+    });
     window.addEventListener("mousemove", onMove, { passive: true });
     document.addEventListener("mouseover", onOver);
     document.documentElement.addEventListener("mouseleave", onLeaveWindow);
@@ -230,6 +271,22 @@ const ShapeCursor = () => {
         a[1] + (b[1] - a[1]) * t,
         a[2] + (b[2] - a[2]) * t,
       ];
+    };
+
+    const trace = (
+      A: Float32Array,
+      n: number,
+      x: number,
+      y: number,
+      s: number,
+    ) => {
+      ctx!.beginPath();
+      for (let k = 0; k < n; k++) {
+        const px = x + A[2 * k] * s,
+          py = y + A[2 * k + 1] * s;
+        if (k) ctx!.lineTo(px, py);
+        else ctx!.moveTo(px, py);
+      }
     };
 
     const drawShape = (
@@ -245,17 +302,30 @@ const ShapeCursor = () => {
       col: number[],
       alpha: number,
       fill: boolean,
+      hl: number,
     ) => {
       if (alpha < 0.01) return;
-      ctx!.globalAlpha = alpha;
       const rgb = `rgb(${Math.round(col[0])},${Math.round(col[1])},${Math.round(col[2])})`;
-      ctx!.beginPath();
-      for (let k = 0; k < nA; k++) {
-        const px = x + A[2 * k] * scale,
-          py = y + A[2 * k + 1] * scale;
-        if (k) ctx!.lineTo(px, py);
-        else ctx!.moveTo(px, py);
+      const sw = Math.max(0.6, w * scale),
+        hw = 3 * scale;
+
+      if (hl > 0.01) {
+        ctx!.globalAlpha = alpha * hl; // only the opacity animates
+        ctx!.strokeStyle = DARK;
+        trace(A, nA, x, y, scale);
+        if (fill) ctx!.closePath();
+        ctx!.lineWidth = fill ? hw + outline * scale : sw + hw;
+        ctx!.stroke();
+        if (nB > 2) {
+          trace(B, nB, x, y, scale);
+          if (fill) ctx!.closePath();
+          ctx!.lineWidth = fill ? hw : sw + hw;
+          ctx!.stroke();
+        }
       }
+
+      ctx!.globalAlpha = alpha;
+      trace(A, nA, x, y, scale);
       if (fill) {
         ctx!.closePath();
         ctx!.fillStyle = rgb;
@@ -263,36 +333,110 @@ const ShapeCursor = () => {
         if (outline > 0.05) {
           ctx!.strokeStyle = rgb;
           ctx!.lineWidth = outline * scale;
-          ctx!.lineJoin = "round";
           ctx!.stroke();
         }
       } else {
         ctx!.strokeStyle = rgb;
-        ctx!.lineWidth = Math.max(0.6, w * scale);
+        ctx!.lineWidth = sw;
         ctx!.stroke();
       }
       if (nB > 2) {
-        ctx!.beginPath();
-        for (let k = 0; k < nB; k++) {
-          const px = x + B[2 * k] * scale,
-            py = y + B[2 * k + 1] * scale;
-          if (k) ctx!.lineTo(px, py);
-          else ctx!.moveTo(px, py);
-        }
+        trace(B, nB, x, y, scale);
         if (fill) {
           ctx!.closePath();
           ctx!.fillStyle = rgb;
           ctx!.fill();
         } else {
           ctx!.strokeStyle = rgb;
-          ctx!.lineWidth = Math.max(0.6, w * scale);
+          ctx!.lineWidth = sw;
           ctx!.stroke();
         }
       }
     };
 
+    // Dark Outline
+    // turns any CSS color (hex, rgb, oklch, ...) into rgba numbers
+    const toRGBA = (css: string) => {
+      if (!sctx) {
+        const c = document.createElement("canvas");
+        c.width = c.height = 1;
+        sctx = c.getContext("2d", { willReadFrequently: true })!;
+      }
+      sctx.clearRect(0, 0, 1, 1);
+      sctx.fillStyle = "#000";
+      sctx.fillStyle = css;
+      sctx.fillRect(0, 0, 1, 1);
+      const d = sctx.getImageData(0, 0, 1, 1).data;
+      return { r: d[0], g: d[1], b: d[2], a: d[3] / 255 };
+    };
+
+    const getBg = (el: Element | null): number[] | null => {
+      const layers: { r: number; g: number; b: number; a: number }[] = [];
+      let node: Element | null = el;
+      while (node) {
+        if (MEDIA.has(node.tagName)) return null;
+        const cs = getComputedStyle(node);
+        if (cs.backgroundImage && cs.backgroundImage !== "none") return null;
+        const c = toRGBA(cs.backgroundColor);
+        if (c.a > 0) {
+          layers.push(c);
+          if (c.a >= 0.99) break;
+        }
+        node = node.parentElement;
+      }
+      let b = [...FALLBACK_BG];
+      for (let i = layers.length - 1; i >= 0; i--) {
+        const l = layers[i];
+        b = [
+          b[0] * (1 - l.a) + l.r * l.a,
+          b[1] * (1 - l.a) + l.g * l.a,
+          b[2] * (1 - l.a) + l.b * l.a,
+        ];
+      }
+      return b;
+    };
+
+    const lum = (c: number[]) => {
+      const f = (v: number) => {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      };
+      return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]);
+    };
+
+    const contrast = (a: number[], b: number[]) =>
+      (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a), lum(b)) + 0.05);
+
+    const dist = (a: number[], b: number[]) =>
+      Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+
+    const needsHalo = (bg: number[] | null, look: [number[], number[]]) => {
+      if (!bg) return true; // image or video: can't sample it
+      const [head, tail] = look;
+      if (Math.min(dist(head, bg), dist(tail, bg)) < DIST_MIN) return true;
+      return contrast(head, bg) < CONTRAST_MIN;
+    };
+
+    // Frame
     let frameId = 0;
     const frame = (now: number) => {
+      const dt = Math.min(50, now - lastFrame || 16);
+      lastFrame = now;
+
+      if (inside && now - lastBgCheck > 60) {
+        lastBgCheck = now;
+        const el = document.elementFromPoint(cX, cY);
+        if (el) {
+          setShape(resolveShape(el));
+          haloTarget = needsHalo(getBg(el), COL[head.name]) ? 1 : 0;
+        }
+      }
+
+      // move toward the target at a steady speed, then ease it for the visuals
+      const step = dt / HALO_MS;
+      halo += Math.max(-step, Math.min(step, haloTarget - halo));
+      const haloE = ease(halo);
+
       vis += ((inside ? 1 : 0) - vis) * 0.16;
       hx = mx;
       hy = my;
@@ -357,6 +501,7 @@ const ShapeCursor = () => {
             tc,
             al,
             head.fill,
+            haloE,
           );
         }
       }
@@ -373,6 +518,7 @@ const ShapeCursor = () => {
         curCol,
         vis,
         head.fill,
+        haloE,
       );
 
       frameId = requestAnimationFrame(frame);
@@ -382,6 +528,7 @@ const ShapeCursor = () => {
     return () => {
       ro.disconnect();
       window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("scroll", onScroll, true);
       document.removeEventListener("mouseover", onOver);
       document.documentElement.removeEventListener("mouseleave", onLeaveWindow);
       cancelAnimationFrame(frameId);

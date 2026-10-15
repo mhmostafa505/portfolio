@@ -194,6 +194,7 @@ const MyProjectsItemDetails = ({
           projectName={project.name}
           theme={theme}
           originRef={coverRef}
+          pointerRef={pointer}
           onClose={closeGallery}
         />
       )}

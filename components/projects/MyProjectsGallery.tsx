@@ -14,13 +14,7 @@ import {
   MyProjectsContentsType,
   ThemeColor,
 } from "@/types/myProjectsTypes";
-import {
-  FiChevronLeft,
-  FiChevronRight,
-  FiX,
-  FiZoomIn,
-  FiZoomOut,
-} from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
 
 const OPEN_MS = 600; // circle wipe in
 const CLOSE_MS = 520; // circle wipe out
@@ -36,6 +30,7 @@ interface MyProjectsGalleryType {
   projectName: string;
   theme: MyProjectsContentsType["themes"][ThemeColor];
   originRef: React.RefObject<HTMLElement | null>; // the cover: the circle grows from it
+  pointerRef: React.RefObject<{ x: number; y: number }>;
   onClose: () => void; // called AFTER the close animation
 }
 
@@ -58,6 +53,7 @@ const MyProjectsGallery = ({
   projectName,
   theme,
   originRef,
+  pointerRef,
   onClose,
 }: MyProjectsGalleryType) => {
   const [index, setIndex] = useState(0);
@@ -135,9 +131,25 @@ const MyProjectsGallery = ({
     ] as const;
   }, [originRef]);
 
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  });
+  // re-sends a mouse event at the pointer's position so the custom cursor re-checks what is under it
+  const refreshCursor = useCallback(() => {
+    const { x, y } = pointerRef.current;
+    if (x < 0 || y < 0) return;
+    requestAnimationFrame(() => {
+      const el = document.elementFromPoint(x, y);
+      if (!el) return;
+      const init = { clientX: x, clientY: y, bubbles: true };
+      el.dispatchEvent(
+        new PointerEvent("pointermove", {
+          ...init,
+          pointerType: "mouse",
+          isPrimary: true,
+        }),
+      );
+      el.dispatchEvent(new MouseEvent("mousemove", init));
+      el.dispatchEvent(new MouseEvent("mouseover", init));
+    });
+  }, [pointerRef]);
 
   /* hidden before the first paint, so there is no flash */
   useLayoutEffect(() => {
@@ -174,6 +186,22 @@ const MyProjectsGallery = ({
       .finished.then(() => onCloseRef.current())
       .catch(() => {});
   }, [getCircles, reduce]);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
+  // zoom turned on / off: the cursor shape changes right away
+  useEffect(() => {
+    refreshCursor();
+  }, [zoom, refreshCursor]);
+
+  // another photo slid under the pointer: refresh now and again when the strip has stopped
+  useEffect(() => {
+    refreshCursor();
+    const t = setTimeout(refreshCursor, reduce ? 50 : 700);
+    return () => clearTimeout(t);
+  }, [index, refreshCursor, reduce]);
 
   /* open: teal circle first, the dark gallery follows right behind it */
   useEffect(() => {
@@ -218,6 +246,7 @@ const MyProjectsGallery = ({
         wipe.style.display = "none";
         anims.forEach((a) => a.cancel());
         phase.current = "open";
+        refreshCursor();
         if (pending.current) {
           pending.current = false;
           close();
@@ -226,7 +255,7 @@ const MyProjectsGallery = ({
       .catch(() => {});
 
     return () => anims.forEach((a) => a.cancel());
-  }, [getCircles, close, reduce]);
+  }, [getCircles, close, reduce, refreshCursor]);
 
   /* lock page scroll + move focus into the gallery, restore both on close */
   useEffect(() => {
@@ -423,7 +452,15 @@ const MyProjectsGallery = ({
                     aria-label={`Photo ${i + 1}: ${img.title}`}
                     aria-current={on}
                     aria-pressed={on && lensOn ? zoom : undefined}
-                    data-cursor={on && !lensOn ? undefined : "pointer"}
+                    data-cursor={
+                      on
+                        ? lensOn
+                          ? zoom
+                            ? "zoomOut"
+                            : "zoomIn"
+                          : undefined
+                        : "pointer"
+                    }
                     className={`${on && lensOn ? (zoom ? "cursor-zoom-out" : "cursor-zoom-in") : ""} absolute inset-0 overflow-hidden rounded-xl ring-1 ring-primary-white/10`}
                   >
                     <Image
@@ -445,21 +482,6 @@ const MyProjectsGallery = ({
                       }}
                       className="absolute inset-0 bg-[#0b0d0c]"
                     />
-
-                    {/* Hint: tells the user the photo can be zoomed */}
-                    {on && lensOn && (
-                      <span
-                        aria-hidden="true"
-                        className={`${theme.text} pointer-events-none absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full border border-current bg-primary-bg/80 px-3 py-1.5 font-mono text-[11px] tracking-wider`}
-                      >
-                        {zoom ? (
-                          <FiZoomOut size={13} />
-                        ) : (
-                          <FiZoomIn size={13} />
-                        )}
-                        {zoom ? "Click to exit zoom" : "Click to zoom"}
-                      </span>
-                    )}
                   </button>
 
                   {/* Magnifier Hover Effect */}
