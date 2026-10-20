@@ -23,6 +23,16 @@
   }
 }
 
+/* Hover Replacement */
+@custom-variant hover (&[data-hover]);
+
+/* Need This for Custom Cursor */
+@media (pointer: fine) {
+  * {
+    cursor: none !important;
+  }
+}
+
 html {
   scrollbar-gutter: stable;
 }
@@ -30,13 +40,6 @@ html {
 html,
 body {
   font-family: "Hanken Grotesk", sans-serif;
-}
-
-/* Need This for Custom Cursor */
-@media (pointer: fine) {
-  * {
-    cursor: none !important;
-  }
 }
 
 /* Animations */

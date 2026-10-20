@@ -1,3 +1,4 @@
+import { useState } from "react";
 import ParticleFlock from "./ParticleFlock";
 import { experienceItem } from "@/types/experienceTypes";
 
@@ -18,6 +19,12 @@ const ExperienceCard = ({
   isVisible,
   index,
 }: ExperienceCardType) => {
+  const [isHovering, setIsHovering] = useState(false);
+  const [mousePosition, setMousePosition] = useState({
+    x: -999,
+    y: -999,
+  });
+
   return (
     <div
       ref={(el) => {
@@ -26,10 +33,10 @@ const ExperienceCard = ({
       className={`relative w-full pb-20 cursor-default transition-all duration-500 last:pb-0 ${
         isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
       }
-        }`}
+        `}
     >
       <div
-        className={`relative w-1/2 max-sm:w-full max-sm:pl-11 max-sm:pr-0 max-sm:text-left ${
+        className={`group relative w-1/2 max-sm:w-full max-sm:pl-11 max-sm:pr-0 max-sm:text-left ${
           isLeft ? "left-0 pr-10 text-right" : "left-1/2 pl-10 text-left"
         } max-sm:left-0`}
       >
@@ -59,8 +66,16 @@ const ExperienceCard = ({
 
         {/* Card Hover: Card Border Glow + Particle Flock */}
         <div
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
           onMouseMove={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
+
+            setMousePosition({
+              x: e.clientX - rect.left,
+              y: e.clientY - rect.top,
+            });
+
             e.currentTarget.style.setProperty(
               "--mx",
               `${e.clientX - rect.left}px`,
@@ -70,12 +85,19 @@ const ExperienceCard = ({
               `${e.clientY - rect.top}px`,
             );
           }}
-          className="group relative inline-block max-w-full overflow-hidden rounded-2xl border-2 border-[#17f1d199] p-5 text-left transition-[border-color,box-shadow,translate] duration-300 hover:border-primary-hover hover:shadow-[0_8px_30px_rgba(23,241,209,0.15)] hover:-translate-y-0.5"
+          className={`${
+            isHovering
+              ? "border-primary-hover shadow-[0_8px_30px_rgba(23,241,209,0.15)] -translate-y-0.5"
+              : "border-[#17f1d199]"
+          } group relative inline-block max-w-full overflow-hidden rounded-2xl border-2 p-5 text-left transition-[border-color,box-shadow,translate] duration-300`}
           style={{
             background: "rgba(255,255,255,0.03)",
           }}
         >
-          <ParticleFlock />
+          <ParticleFlock
+            isHovering={isHovering}
+            mousePosition={mousePosition}
+          />
 
           {/* Card Content */}
           <div className="relative pointer-events-none">

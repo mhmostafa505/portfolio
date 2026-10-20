@@ -19,6 +19,12 @@ interface MyProjectsItemDetailsType {
   stackRef: React.RefObject<HTMLDivElement | null>;
 }
 
+const TAG_HOVERS = [
+  "group-hover:border-primary-hover group-hover:text-primary-hover group-hover:bg-primary-hover/10",
+  "group-hover:border-primary-yellow group-hover:text-primary-yellow group-hover:bg-primary-yellow/10",
+  "group-hover:border-primary-purple group-hover:text-primary-purple group-hover:bg-primary-purple/10",
+];
+
 const MyProjectsItemDetails = ({
   project,
   active,
@@ -126,10 +132,11 @@ const MyProjectsItemDetails = ({
 
       {/* Stack */}
       <div ref={stackRef} className="flex flex-wrap gap-2">
-        {project.stack.map((tech) => (
+        {project.stack.map((tech, i) => (
           <div key={tech} className="group">
             <span
-              className={`block cursor-default rounded border border-primary-white/20 px-2.5 py-1 font-mono text-[11.5px] text-primary-white/55 transition-[transform,color,border-color,background-color] duration-200 ease-out ${theme.tagHover}`}
+              className={`${project.color === "primary-hover" ? TAG_HOVERS[i % TAG_HOVERS.length] : project.color === "primary-yellow" ? TAG_HOVERS[(i + 1) % TAG_HOVERS.length] : project.color === "primary-purple" ? TAG_HOVERS[(i + 2) % TAG_HOVERS.length] : theme.tagHover} 
+              block cursor-default rounded border border-primary-white/20 px-2.5 py-1 font-mono text-[11.5px] text-primary-white/55 transition-[transform,color,border-color,background-color] duration-200 ease-out`}
             >
               {tech}
             </span>

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 const PARTICLE_COUNT = 22;
 const REPEL_RADIUS = 70;
@@ -16,13 +16,22 @@ interface Particle {
   hy: number;
 }
 
-const ParticleFlock = () => {
+interface ParticleFlockProps {
+  isHovering: boolean;
+  mousePosition: { x: number; y: number };
+}
+
+const ParticleFlock = ({ isHovering, mousePosition }: ParticleFlockProps) => {
+  // const [isHovering, setIsHovering] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
-  const mouseRef = useRef({ x: -999, y: -999 });
   const frameRef = useRef<number>(0);
-  const [isHovering, setIsHovering] = useState(false);
+  const mouseRef = useRef(mousePosition);
+
+  useEffect(() => {
+    mouseRef.current = mousePosition;
+  }, [mousePosition]);
 
   // (re)builds particles whenever the card's size is known/changes
   useEffect(() => {
@@ -34,6 +43,7 @@ const ParticleFlock = () => {
       const { clientWidth: w, clientHeight: h } = container;
       canvas.width = w;
       canvas.height = h;
+
       particlesRef.current = Array.from({ length: PARTICLE_COUNT }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
@@ -45,8 +55,10 @@ const ParticleFlock = () => {
     };
 
     setup();
+
     const observer = new ResizeObserver(setup);
     observer.observe(container);
+
     return () => observer.disconnect();
   }, []);
 
@@ -54,6 +66,7 @@ const ParticleFlock = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -100,21 +113,7 @@ const ParticleFlock = () => {
   }, [isHovering]);
 
   return (
-    <div
-      ref={containerRef}
-      className="pointer-events-none absolute inset-0"
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      onMouseMove={(e) => {
-        const rect = containerRef.current?.getBoundingClientRect();
-        if (!rect) return;
-        mouseRef.current = {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        };
-      }}
-      style={{ pointerEvents: "auto" }}
-    >
+    <div ref={containerRef} className="pointer-events-none absolute inset-0">
       <canvas
         ref={canvasRef}
         className={`h-full w-full transition-opacity duration-300 ${
