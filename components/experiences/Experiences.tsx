@@ -27,6 +27,7 @@ const Experiences = () => {
   const [introDone, setIntroDone] = useState(false);
 
   const timelineRef = useRef<HTMLDivElement>(null);
+  const completedRef = useRef(false);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const targetHeightRef = useRef(0);
   const dotTopRef = useRef(0);
@@ -65,6 +66,7 @@ const Experiences = () => {
           ticking = false;
           updateProgress({
             timelineRef,
+            completedRef,
             setIsBouncing,
             setIntroDone,
             setIntroStarted,
@@ -78,6 +80,7 @@ const Experiences = () => {
 
     updateProgress({
       timelineRef,
+      completedRef,
       setIsBouncing,
       setIntroDone,
       setIntroStarted,
