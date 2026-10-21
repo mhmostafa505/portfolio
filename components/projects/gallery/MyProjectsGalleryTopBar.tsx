@@ -49,13 +49,14 @@ const MyProjectsGalleryTopBar = ({
         type="button"
         onClick={close}
         data-cursor="pointer"
-        aria-label="Close gallery"
-        className={`${theme.hover} pointer-events-auto inline-flex items-center gap-2.5 justify-self-end rounded-full border border-primary-white/10 bg-primary-white/5 py-1.5 pr-2 pl-3.5 text-primary-white transition-colors`}
+        aria-label="Close gallery (Esc)"
+        className={`${theme.hover} group pointer-events-auto grid size-10 place-items-center justify-self-end rounded-[10px] border border-primary-white/20 bg-transparent text-primary-white transition-colors`}
       >
-        <FiX aria-hidden="true" />
-        <kbd className="rounded-full bg-primary-white/10 px-2 py-0.5 text-[10px] text-primary-white/55">
-          esc
-        </kbd>
+        <FiX
+          size={20}
+          aria-hidden="true"
+          className="transition-transform duration-300 group-hover:rotate-90"
+        />
       </button>
     </div>
   );

@@ -37,8 +37,21 @@ const MyProjectsBrowserBar = ({
         />
       </div>
 
-      <div className="flex items-center justify-center gap-2 truncate rounded-full bg-primary-white/6 px-4 py-1.5 text-xs tracking-wide text-primary-white">
-        <span className={`${theme.text} text-[10px] transition-colors`}>●</span>
+      {/* Address Bar */}
+      <div className="group flex items-center justify-center gap-2 truncate rounded-full bg-primary-white/6 px-4 py-1.5 text-xs tracking-wide text-primary-white/80 transition-colors hover:text-primary-white">
+        {/* Dot with ping hover animation*/}
+        <span
+          className={`${theme.text} relative block size-1.5 shrink-0 transition-colors`}
+        >
+          <span
+            aria-hidden="true"
+            className="absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-current"
+          />
+          <span
+            aria-hidden="true"
+            className="absolute top-1/2 left-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-current opacity-0 group-hover:animate-[dot-ping_1s_ease-out_infinite] motion-reduce:group-hover:animate-none"
+          />
+        </span>
 
         {typeText}
 

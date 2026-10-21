@@ -5,6 +5,7 @@ import Hero from "@/components/hero/Hero";
 import About from "@/components/about/About";
 import Experiences from "@/components/experiences/Experiences";
 import MyProjects from "@/components/projects/MyProjects";
+import Skills from "@/components/skills/Skills";
 
 const HomePage = () => {
   return (
@@ -15,6 +16,7 @@ const HomePage = () => {
         <About />
         <Experiences />
         <MyProjects />
+        <Skills />
       </div>
       <SocialLinks />
     </>
