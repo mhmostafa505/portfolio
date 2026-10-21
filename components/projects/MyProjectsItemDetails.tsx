@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useLiveIcon } from "@/hooks/useLiveDemoIcon";
-import MyProjectsGallery from "./MyProjectsGallery";
+import MyProjectsGallery from "./gallery/MyProjectsGallery";
 import {
   MyProjectsContentsType,
   Project,
