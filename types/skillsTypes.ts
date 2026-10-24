@@ -26,6 +26,8 @@ export interface LayoutDef {
   refW: number;
   refH: number;
   baseSize: number;
+  /* Pixels per reference unit */
+  scale: number;
   slots: LayoutSlot[];
 }
 
@@ -57,12 +59,15 @@ export interface FieldEvents {
 }
 
 export interface LayoutPreset {
-  refW: number;
+  // Icon size at depth 1, in reference units
   baseSize: number;
+  // Empty space kept between neighboring icons
   gap: number;
+  // Keep icons this far from the sides, top and bottom of their box
   marginX: number;
   marginY: number;
-  minH: number;
+  // Biggest icon size (depth 1) in real pixels
+  maxIconPx: number;
 }
 
 export interface IconState {

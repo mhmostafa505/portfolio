@@ -95,30 +95,32 @@ export const STAR: {
   hoverSpeed: 0.9,
 };
 
-export const LAYOUT_PRESETS: Record<LayoutMode, LayoutPreset> = {
-  desktop: {
-    refW: 680,
-    baseSize: 64,
-    gap: 30,
-    marginX: 64,
-    marginY: 56,
-    minH: 360,
-  },
-  mobile: {
-    refW: 340,
-    baseSize: 48,
-    gap: 22,
-    marginX: 50,
-    marginY: 50,
-    minH: 480,
-  },
+// Stage heights. navOffset = the height of your fixed navbar in px
+export const STAGE = {
+  navOffset: 0,
+  minHeight: 520,
+  settledHeight: "min(90svh, 760px)", // height after the intro finished
 };
+export const STAGE_INTRO_HEIGHT = `max(calc(100svh - ${STAGE.navOffset}px), ${STAGE.minHeight}px)`;
+
+// Scroll behavior of the intro
+export const SCROLL = {
+  enterRatio: 0.5, // how much of the stage must be on screen before the intro can start
+  idleMs: 150, // the page must stop scrolling this long first (fast scrolling never triggers it)
+  duration: 800, // ms of the auto-scroll that aligns the stage
+  tolerance: 6, // px; closer than this counts as aligned
+};
+
+export const LAYOUT_PRESETS: Record<LayoutMode, LayoutPreset> = {
+  desktop: { baseSize: 60, gap: 34, marginX: 70, marginY: 60, maxIconPx: 92 },
+  mobile: { baseSize: 46, gap: 24, marginX: 46, marginY: 50, maxIconPx: 56 },
+};
+
+// Where the icons live inside the full-width stage
+export const CONTENT = { widthRatio: 0.94, heightRatio: 0.7, maxWidth: 1800 };
 
 // Change this number to get a different random arrangement
 export const LAYOUT_SEED = 7;
-
-// Where the icons live inside the full-width stage (the canvas itself is full width)
-export const CONTENT = { widthRatio: 0.86, heightRatio: 0.74, maxWidth: 1100 };
 
 // Sizes cycle through these so icons don't look like a flat grid
 export const DEPTHS = [0.92, 1.05, 0.95, 1, 0.9, 1.08];

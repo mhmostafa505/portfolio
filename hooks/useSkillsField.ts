@@ -3,7 +3,12 @@
 import { useEffect, useRef, type RefObject } from "react";
 import { ParticleField } from "@/utils/skillsFunctions/ParticleField";
 import { sampleSkill } from "@/utils/skillsFunctions/sampleIcon";
-import { SKILLS } from "@/content/skillsContents";
+import {
+  animateScrollTo,
+  getAlignTarget,
+  onScrollIdle,
+} from "@/utils/skillsFunctions/skillsScroll";
+import { SKILLS, SCROLL } from "@/content/skillsContents";
 import type { FieldEvents } from "@/types/skillsTypes";
 
 interface Options {
@@ -25,44 +30,71 @@ export function useSkillsField({ stageRef, bgRef, fgRef, events }: Options) {
     const fg = fgRef.current;
     if (!stage || !bg || !fg) return;
 
+    let introRunning = false;
     const field = new ParticleField(bg, fg, SKILLS, {
-      onStart: () => eventsRef.current.onStart(),
+      onStart: () => {
+        introRunning = true;
+        eventsRef.current.onStart();
+      },
       onSlam: (skill, order) => eventsRef.current.onSlam(skill, order),
-      onIntroEnd: () => eventsRef.current.onIntroEnd(),
+      onIntroEnd: () => {
+        introRunning = false;
+        eventsRef.current.onIntroEnd();
+      },
       onHover: (index) => eventsRef.current.onHover(index),
     });
 
     let cancelled = false;
-    let ready = false;
-    let visible = false;
+    let ready = false; // icons decoded
+    let triggered = false; // the user stopped on the section: intro is allowed to run
+    let ratio = 0; // how much of the stage is on screen
+    let cancelScroll = () => {};
 
-    // The intro only starts when icons are decoded AND the section is on screen.
     const sync = () => {
-      if (!ready) return;
-      if (visible) field.start();
+      if (!ready || !triggered) return;
+      if (ratio > 0) field.start();
       else field.pause();
     };
 
+    const align = () => {
+      cancelScroll();
+      cancelScroll = animateScrollTo(getAlignTarget(stage), SCROLL.duration);
+    };
+
+    // Runs a moment after the page stops scrolling
+    const onIdle = () => {
+      if (!ready || ratio < SCROLL.enterRatio) return;
+      if (!triggered) {
+        triggered = true; // first time: start the intro and bring the stage fully into view
+        sync();
+        align();
+      } else if (introRunning) {
+        align(); // intro is playing: put the stage back in place if it was nudged
+      }
+    };
+
+    // The canvas is a fixed size, so measure the canvas (not the stage)
     const measure = () => {
-      const rect = stage.getBoundingClientRect();
+      const rect = bg.getBoundingClientRect();
       if (rect.width > 0 && rect.height > 0) {
         field.resize(Math.round(rect.width), Math.round(rect.height));
       }
     };
-
     measure();
 
     const resizeObserver = new ResizeObserver(measure);
-    resizeObserver.observe(stage);
+    resizeObserver.observe(bg);
 
     const visibilityObserver = new IntersectionObserver(
       ([entry]) => {
-        visible = entry.isIntersecting;
+        ratio = entry.intersectionRatio;
         sync();
       },
-      { threshold: 0.6 },
+      { threshold: Array.from({ length: 21 }, (_, i) => i / 20) },
     );
     visibilityObserver.observe(stage);
+
+    const stopIdleWatch = onScrollIdle(onIdle);
 
     Promise.allSettled(SKILLS.map(sampleSkill)).then((results) => {
       if (cancelled) return;
@@ -70,11 +102,11 @@ export function useSkillsField({ stageRef, bgRef, fgRef, events }: Options) {
         results.map((r) => (r.status === "fulfilled" ? r.value : [])),
       );
       ready = true;
-      sync();
+      onIdle();
     });
 
     const onMove = (e: PointerEvent) => {
-      const rect = stage.getBoundingClientRect();
+      const rect = bg.getBoundingClientRect();
       field.setPointer({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     };
     const onLeave = () => field.setPointer(null);
@@ -84,6 +116,8 @@ export function useSkillsField({ stageRef, bgRef, fgRef, events }: Options) {
 
     return () => {
       cancelled = true;
+      cancelScroll();
+      stopIdleWatch();
       resizeObserver.disconnect();
       visibilityObserver.disconnect();
       stage.removeEventListener("pointermove", onMove);

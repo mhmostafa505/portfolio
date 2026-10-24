@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import LetterBoxBars from "./SkillsLetterBoxBars";
 import { useSkillsField } from "@/hooks/useSkillsField";
 import { flash, shake } from "@/utils/skillsFunctions/effects";
-import { SKILLS } from "@/content/skillsContents";
+import { SKILLS, STAGE, STAGE_INTRO_HEIGHT } from "@/content/skillsContents";
 import { FieldEvents } from "@/types/skillsTypes";
 
 const SkillsField = () => {
@@ -17,6 +17,7 @@ const SkillsField = () => {
 
   const [introActive, setIntroActive] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [settled, setSettled] = useState(false);
 
   const events = useMemo<FieldEvents>(
     () => ({
@@ -31,6 +32,7 @@ const SkillsField = () => {
         shake(worldRef.current, hero ? 10 : 6, hero ? 260 : 160);
       },
       onIntroEnd: () => {
+        setSettled(true);
         setIntroActive(false);
         if (labelRef.current) labelRef.current.style.opacity = "0";
         flash(flashRef.current, 0.6, 450);
@@ -47,9 +49,14 @@ const SkillsField = () => {
   return (
     <div
       ref={stageRef}
-      className="relative left-1/2 h-svh min-h-130 w-screen -translate-x-1/2 touch-pan-y overflow-hidden"
+      className="relative left-1/2 flex w-screen -translate-x-1/2 touch-pan-y items-center overflow-hidden transition-[height] duration-1000 ease-out [overflow-anchor:none]"
+      style={{ height: settled ? STAGE.settledHeight : STAGE_INTRO_HEIGHT }}
     >
-      <div ref={worldRef} className="absolute inset-0">
+      <div
+        ref={worldRef}
+        className="relative w-full shrink-0"
+        style={{ height: STAGE_INTRO_HEIGHT }}
+      >
         <canvas
           ref={bgRef}
           className="absolute inset-0 h-full w-full"
@@ -57,8 +64,8 @@ const SkillsField = () => {
         />
         <canvas
           ref={fgRef}
-          className="absolute inset-0 h-full w-full"
           aria-hidden
+          className="absolute inset-0 h-full w-full"
         />
         <p
           ref={labelRef}
@@ -67,10 +74,10 @@ const SkillsField = () => {
         />
       </div>
 
-      <LetterBoxBars
+      {/* <LetterBoxBars
         open={introActive || hoveredIndex !== null}
         skill={hoveredSkill}
-      />
+      /> */}
 
       <div
         ref={flashRef}

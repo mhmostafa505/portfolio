@@ -34,28 +34,39 @@ interface Point {
 const clamp = (v: number, lo: number, hi: number) =>
   Math.min(Math.max(v, lo), hi);
 
-export function buildLayout(skills: Skill[], mode: LayoutMode): LayoutDef {
+export function buildLayout(
+  skills: Skill[],
+  mode: LayoutMode,
+  boxW: number,
+  boxH: number,
+): LayoutDef {
   const p = LAYOUT_PRESETS[mode];
-  const count = skills.length;
+  const total = skills.length;
+  const count = Math.max(1, total);
   const rand = mulberry32(LAYOUT_SEED + (mode === "mobile" ? 101 : 0));
 
-  // The reference area grows with the number of skills, so there is always room
-  const areaPerIcon = (p.baseSize + p.gap) ** 2 * 1.6;
-  const usableW = p.refW - p.marginX * 2;
-  const refH = Math.max(
-    p.minH,
-    Math.ceil((count * areaPerIcon) / usableW + p.marginY * 2),
-  );
-  const usableH = refH - p.marginY * 2;
-  const centerX = p.refW / 2;
+  // Pixels per reference unit: as big as allowed, but small enough that every icon has room
+  const areaPerIcon = (p.baseSize + p.gap) ** 2 * 1.9;
+  const fit = Math.sqrt((boxW * boxH) / (count * areaPerIcon));
+  const scale = Math.min(fit, p.maxIconPx / p.baseSize);
+  const refW = boxW / scale;
+  const refH = boxH / scale;
+
+  const usableW = Math.max(1, refW - p.marginX * 2);
+  const usableH = Math.max(1, refH - p.marginY * 2);
+  const centerX = refW / 2;
   const centerY = refH / 2;
 
   const heroIndex = skills.findIndex((s) => s.hero);
-  const others = count - (heroIndex >= 0 ? 1 : 0);
+  const others = total - (heroIndex >= 0 ? 1 : 0);
 
-  // 1. One random point inside every cell of a grid: spread out, but not in lines
-  const cols = Math.max(1, Math.ceil(Math.sqrt((count * usableW) / usableH)));
-  const rows = Math.max(1, Math.ceil(count / cols));
+  // 1. A grid with more cells than icons. Random cells get a random point inside them.
+  const totalCells = Math.ceil(count * 2.4);
+  const cols = Math.max(
+    1,
+    Math.round(Math.sqrt((totalCells * usableW) / usableH)),
+  );
+  const rows = Math.max(1, Math.ceil(totalCells / cols));
   const cellW = usableW / cols;
   const cellH = usableH / rows;
   const cells: { x: number; y: number }[] = [];
@@ -149,7 +160,7 @@ export function buildLayout(skills: Skill[], mode: LayoutMode): LayoutDef {
     }
     for (const pt of points) {
       if (pt.fixed) continue;
-      pt.x = clamp(pt.x, p.marginX, p.refW - p.marginX);
+      pt.x = clamp(pt.x, p.marginX, refW - p.marginX);
       pt.y = clamp(pt.y, p.marginY, refH - p.marginY);
     }
     if (!moved) break;
@@ -162,5 +173,5 @@ export function buildLayout(skills: Skill[], mode: LayoutMode): LayoutDef {
     depth: points[i].depth,
   }));
 
-  return { refW: p.refW, refH, baseSize: p.baseSize, slots };
+  return { refW, refH, baseSize: p.baseSize, scale, slots };
 }

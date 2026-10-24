@@ -15,7 +15,6 @@ import {
   FieldEvents,
   IconSample,
   IconState,
-  LayoutDef,
   LayoutMode,
   Particle,
   Rgb,
@@ -58,9 +57,6 @@ export class ParticleField {
   private tintRgb: Rgb = STAR.base;
   private dirty = { x0: 0, y0: 0, x1: 0, y1: 0 };
 
-  private mode: LayoutMode = "desktop";
-  private layout: LayoutDef;
-
   constructor(
     bg: HTMLCanvasElement,
     fg: HTMLCanvasElement,
@@ -74,7 +70,6 @@ export class ParticleField {
     this.fg = fg;
     this.skills = skills;
     this.events = events;
-    this.layout = buildLayout(skills, this.mode);
     this.bgCtx = bgCtx;
     this.fgCtx = fgCtx;
     this.icons = skills.map((skill) => ({
@@ -112,20 +107,14 @@ export class ParticleField {
     this.pixels = new Uint32Array(this.image.data.buffer);
     this.dirty = { x0: width, y0: height, x1: 0, y1: 0 };
 
-    // Portrait stage => mobile arrangement, otherwise desktop
+    // The canvas is full width. The icons are arranged inside a wide box in its middle.
     const mode: LayoutMode = width / height < 1 ? "mobile" : "desktop";
-    if (mode !== this.mode) {
-      this.mode = mode;
-      this.layout = buildLayout(this.skills, mode);
-    }
-    const layout = this.layout;
-
-    // The icons live in a centred box. The canvas itself is full width.
     const boxW = Math.min(width * CONTENT.widthRatio, CONTENT.maxWidth);
     const boxH = height * CONTENT.heightRatio;
-    this.unit = Math.min(boxW / layout.refW, boxH / layout.refH);
-    const offsetX = (width - layout.refW * this.unit) / 2;
-    const offsetY = (height - layout.refH * this.unit) / 2;
+    const layout = buildLayout(this.skills, mode, boxW, boxH);
+    this.unit = layout.scale;
+    const offsetX = (width - boxW) / 2;
+    const offsetY = (height - boxH) / 2;
     const slamSize = layout.baseSize * this.unit * 2.4;
 
     for (const icon of this.icons) {
