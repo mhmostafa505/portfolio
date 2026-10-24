@@ -13,6 +13,7 @@ export const onScroll = ({
   navTimer,
   setActive,
 }: OnScrollFunctionType) => {
+  if (trackRef.current?.dataset.skip === "true") return;
   const track = trackRef.current;
   if (!track) return;
 

@@ -10,6 +10,7 @@ import {
   SAMPLE_SIZE,
   SPRING,
   STAR,
+  STAGE,
 } from "@/content/skillsContents";
 import {
   FieldEvents,
@@ -109,12 +110,15 @@ export class ParticleField {
 
     // The canvas is full width. The icons are arranged inside a wide box in its middle.
     const mode: LayoutMode = width / height < 1 ? "mobile" : "desktop";
+    // The navbar covers the top of the screen, so the icons are centred in the space below it
+    const topInset = Math.min(STAGE.navOffset, height * 0.3);
+    const areaH = height - topInset;
     const boxW = Math.min(width * CONTENT.widthRatio, CONTENT.maxWidth);
-    const boxH = height * CONTENT.heightRatio;
+    const boxH = areaH * CONTENT.heightRatio;
     const layout = buildLayout(this.skills, mode, boxW, boxH);
     this.unit = layout.scale;
     const offsetX = (width - boxW) / 2;
-    const offsetY = (height - boxH) / 2;
+    const offsetY = topInset + (areaH - boxH) / 2;
     const slamSize = layout.baseSize * this.unit * 2.4;
 
     for (const icon of this.icons) {

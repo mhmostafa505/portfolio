@@ -97,11 +97,10 @@ export const STAR: {
 
 // Stage heights. navOffset = the height of your fixed navbar in px
 export const STAGE = {
-  navOffset: 0,
-  minHeight: 520,
-  settledHeight: "min(90svh, 760px)", // height after the intro finished
+  navOffset: 96, // icons are centered in the space BELOW this
+  introHeight: "max(100svh, 520px)", // while the intro plays
+  settledHeight: "min(100svh, 760px)", // after the intro
 };
-export const STAGE_INTRO_HEIGHT = `max(calc(100svh - ${STAGE.navOffset}px), ${STAGE.minHeight}px)`;
 
 // Scroll behavior of the intro
 export const SCROLL = {
@@ -121,6 +120,12 @@ export const CONTENT = { widthRatio: 0.94, heightRatio: 0.7, maxWidth: 1800 };
 
 // Change this number to get a different random arrangement
 export const LAYOUT_SEED = 7;
+
+// How many arrangements are tried. The most balanced one wins
+export const LAYOUT_ATTEMPTS = 60;
+
+// How strongly icons are evened out before scoring (0 = fully random, 6 = nicely spread)
+export const LAYOUT_EVENNESS = 6;
 
 // Sizes cycle through these so icons don't look like a flat grid
 export const DEPTHS = [0.92, 1.05, 0.95, 1, 0.9, 1.08];

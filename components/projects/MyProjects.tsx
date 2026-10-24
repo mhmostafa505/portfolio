@@ -225,6 +225,7 @@ const MyProjects = () => {
       {/* Scroll track: gives every project its own scroll distance */}
       <div
         ref={trackRef}
+        data-projects-track=""
         style={
           SCROLL_LOCK
             ? {

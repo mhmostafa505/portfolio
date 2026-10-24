@@ -1,5 +1,12 @@
 "use client";
-import { createContext, useCallback, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+} from "react";
+import { navigateTo } from "@/utils/myProjectsNavigateToFunction";
 
 interface ScrollSpyValue {
   activeId: string;
@@ -30,6 +37,8 @@ export const ScrollSpyProvider = ({
   const [intersecting] = useState<Map<string, DOMRectReadOnly>>(
     () => new Map(),
   );
+
+  const navId = useRef(0);
 
   const [observer] = useState<IntersectionObserver | null>(() => {
     if (typeof window === "undefined") return null;
@@ -105,23 +114,16 @@ export const ScrollSpyProvider = ({
       );
       setRevealed((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
 
-      target.scrollIntoView({
-        behavior: "smooth",
-        block: id === HOME_ID ? "start" : "start",
-      });
-
-      // resume observing once the scroll has actually settled
-      const resume = () => {
+      // home = top of the page. Pass 0, because document.body contains the whole page,
+      // and then the projects section could never be detected as "in between".
+      const mine = ++navId.current;
+      navigateTo(id === HOME_ID ? 0 : target).then(() => {
+        // resume observing only after the LAST click has finished
+        if (mine !== navId.current) return;
         document
           .querySelectorAll("section[id]")
           .forEach((s) => observer?.observe(s));
-        window.removeEventListener("scrollend", resume);
-      };
-      if ("onscrollend" in window) {
-        window.addEventListener("scrollend", resume, { once: true });
-      } else {
-        setTimeout(resume, 700);
-      }
+      });
     },
     [observer, intersecting],
   );

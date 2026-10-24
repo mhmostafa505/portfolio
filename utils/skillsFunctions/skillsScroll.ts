@@ -1,13 +1,13 @@
-import { SCROLL, STAGE } from "@/content/skillsContents";
+import { SCROLL } from "@/content/skillsContents";
 
 const CANCEL_EVENTS = ["wheel", "touchstart", "keydown", "mousedown"] as const;
 
-// Scroll position where the stage sits right under the navbar
-export const getAlignTarget = (stage: HTMLElement) =>
-  Math.max(
-    0,
-    stage.getBoundingClientRect().top + window.scrollY - STAGE.navOffset,
-  );
+// Scroll position that centres the stage in the window
+export const getAlignTarget = (stage: HTMLElement) => {
+  const rect = stage.getBoundingClientRect();
+  const spare = Math.max(0, (window.innerHeight - rect.height) / 2);
+  return Math.max(0, rect.top + window.scrollY - spare);
+};
 
 const jumpTo = (y: number) =>
   window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });

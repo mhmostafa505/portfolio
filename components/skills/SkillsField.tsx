@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import LetterBoxBars from "./SkillsLetterBoxBars";
 import { useSkillsField } from "@/hooks/useSkillsField";
 import { flash, shake } from "@/utils/skillsFunctions/effects";
-import { SKILLS, STAGE, STAGE_INTRO_HEIGHT } from "@/content/skillsContents";
+import { SKILLS, STAGE } from "@/content/skillsContents";
 import { FieldEvents } from "@/types/skillsTypes";
 
 const SkillsField = () => {
@@ -44,18 +44,19 @@ const SkillsField = () => {
 
   useSkillsField({ stageRef, bgRef, fgRef, events });
 
+  const introHeight = STAGE.introHeight;
   const hoveredSkill = hoveredIndex === null ? null : SKILLS[hoveredIndex];
 
   return (
     <div
       ref={stageRef}
       className="relative left-1/2 flex w-screen -translate-x-1/2 touch-pan-y items-center overflow-hidden transition-[height] duration-1000 ease-out [overflow-anchor:none]"
-      style={{ height: settled ? STAGE.settledHeight : STAGE_INTRO_HEIGHT }}
+      style={{ height: settled ? STAGE.settledHeight : introHeight }}
     >
       <div
         ref={worldRef}
         className="relative w-full shrink-0"
-        style={{ height: STAGE_INTRO_HEIGHT }}
+        style={{ height: introHeight }}
       >
         <canvas
           ref={bgRef}
