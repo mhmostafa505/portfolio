@@ -2,6 +2,7 @@
 import { useCallback, useState } from "react";
 import { useScrollSpy } from "@/contexts/ScrollSpyContext";
 import SectionHeader from "../SectionHeader";
+import SkillsField from "./SkillsField";
 
 const pills = ["#Noob", "#Professional", "#Master"];
 
@@ -30,6 +31,11 @@ const Skills = () => {
         number={4}
         isReverse={true}
       />
+
+      {/* Main Skills Section */}
+      <div className="mt-12">
+        <SkillsField />
+      </div>
     </section>
   );
 };

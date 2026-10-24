@@ -17,7 +17,7 @@ const MainLayout = ({ children }: LayoutProps<"/">) => {
       suppressHydrationWarning
     >
       <body
-        className="min-h-full flex flex-col bg-primary-bg text-primary-white"
+        className="min-h-full overflow-x-clip flex flex-col bg-primary-bg text-primary-white"
         cz-shortcut-listen="true"
         suppressHydrationWarning
       >
