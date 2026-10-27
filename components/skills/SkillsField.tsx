@@ -13,7 +13,6 @@ const SkillsField = () => {
   const nameRef = useRef<HTMLCanvasElement>(null);
   const worldRef = useRef<HTMLDivElement>(null);
   const flashRef = useRef<HTMLDivElement>(null);
-  const labelRef = useRef<HTMLParagraphElement>(null);
 
   const [settled, setSettled] = useState(false);
 
@@ -21,16 +20,11 @@ const SkillsField = () => {
     () => ({
       onSlam: (skill) => {
         const hero = Boolean(skill.hero);
-        if (labelRef.current) {
-          labelRef.current.textContent = skill.name;
-          labelRef.current.style.opacity = "1";
-        }
         flash(flashRef.current, hero ? 0.45 : 0.22, hero ? 320 : 160);
         shake(worldRef.current, hero ? 10 : 6, hero ? 260 : 160);
       },
       onIntroEnd: () => {
         setSettled(true);
-        if (labelRef.current) labelRef.current.style.opacity = "0";
         flash(flashRef.current, 0.6, 450);
       },
     }),
@@ -66,12 +60,6 @@ const SkillsField = () => {
           ref={nameRef}
           className="absolute inset-0 h-full w-full"
           aria-hidden
-        />
-
-        <p
-          ref={labelRef}
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-[14%] text-center text-xl font-medium tracking-[0.25em] opacity-0"
         />
       </div>
 

@@ -2,6 +2,7 @@ import { buildLayout } from "./skillsLayout";
 import { clamp, damp, hexToRgb, mixRgb } from "./math";
 import { SkillLabel } from "./skillLabel";
 import { Starfield } from "./Starfield";
+import { IntroTitle } from "./introTitle";
 import {
   FLOAT,
   CONTENT,
@@ -12,6 +13,7 @@ import {
   SPRING,
   STAR,
   STAGE,
+  INTRO_TITLE,
 } from "@/content/skillsContents";
 import {
   FieldEvents,
@@ -34,6 +36,7 @@ export class ParticleField {
   private readonly stars = new Starfield();
   private readonly order: number[] = [];
   private readonly label: SkillLabel;
+  private readonly title: IntroTitle;
 
   private particles: Particle[] = [];
   private image: ImageData | null = null;
@@ -50,6 +53,7 @@ export class ParticleField {
   private running = false;
   private raf = 0;
   private lastFrame = 0;
+  private centerY = 0;
 
   private pointer: { x: number; y: number } | null = null;
   private cam = { x: 0, y: 0 };
@@ -98,6 +102,7 @@ export class ParticleField {
       start: Number.POSITIVE_INFINITY,
       end: Number.POSITIVE_INFINITY,
     }));
+    this.title = new IntroTitle(bg, skills);
     this.buildSchedule();
   }
 
@@ -123,7 +128,7 @@ export class ParticleField {
     this.unit = layout.scale;
     const offsetX = (width - boxW) / 2;
     const offsetY = topInset + (areaH - boxH) / 2;
-    const slamSize = layout.baseSize * this.unit * 2.4;
+    const slamSize = layout.baseSize * this.unit * INTRO.slamSize;
 
     for (const icon of this.icons) {
       const slot = layout.slots.find((s) => s.id === icon.skill.id);
@@ -137,8 +142,9 @@ export class ParticleField {
       icon.size = layout.baseSize * slot.depth * this.unit;
       icon.fp = icon.size / SAMPLE_SIZE;
       icon.block = Math.max(2, Math.ceil(icon.fp * 1.7));
-      icon.slamScale = (slamSize / SAMPLE_SIZE) * (icon.skill.hero ? 1.25 : 1);
-      icon.slamBlock = Math.ceil(icon.slamScale * 2);
+      icon.slamScale =
+        (slamSize / SAMPLE_SIZE) * (icon.skill.hero ? INTRO.heroScale : 1);
+      icon.slamBlock = Math.ceil(icon.slamScale * INTRO.slamBlock);
       if (!this.started) {
         icon.cur.x = icon.x;
         icon.cur.y = icon.y;
@@ -148,6 +154,14 @@ export class ParticleField {
     this.vp.x = width / 2;
     this.vp.y = height / 2;
     this.label.resize(width, height, this.unit);
+    this.centerY = offsetY + boxH / 2;
+    this.title.resize(
+      width / 2,
+      this.centerY,
+      boxW * INTRO_TITLE.widthRatio,
+      boxH,
+      this.unit,
+    );
   }
 
   setSamples(samples: IconSample[][]) {
@@ -230,6 +244,14 @@ export class ParticleField {
       t += duration;
     }
     this.introEnd = t;
+    this.title.setSchedule(
+      this.order.map((index) => ({
+        index,
+        start: this.icons[index].start,
+        end: this.icons[index].end,
+      })),
+      this.introEnd,
+    );
   }
 
   private update(dt: number) {
@@ -337,6 +359,7 @@ export class ParticleField {
       mixRgb(STAR.base, this.tintRgb, this.tint),
       clamp(t / 0.5, 0, 1), // stars fade in: no flicker, no flash
     );
+    this.title.draw(this.bgCtx, t);
   }
 
   private drawParticles(
@@ -349,7 +372,7 @@ export class ParticleField {
     const W = this.width;
     const H = this.height;
     const cx = W / 2;
-    const cy = H / 2;
+    const cy = this.centerY;
     const pdt = Math.min(dt, 0.033);
     const eSlam = Math.exp(-SPRING.slam.damp * pdt);
     const eFly = Math.exp(-SPRING.fly.damp * pdt);

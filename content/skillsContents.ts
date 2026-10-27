@@ -69,6 +69,23 @@ export const INTRO = {
   heroSlot: 0.55, // seconds for the hero (last) icon
   slamSpread: 0.12,
   liveDelay: 0.6,
+  slamSize: 2.2, // size of the dust logo during its slam (was 2.4 in the code)
+  slamBlock: 1.8, // particle size during the slam (was 2)
+  heroScale: 1.25, // the last icon (React) is this much bigger
+};
+
+/* Big name behind the dust during the intro */
+export const INTRO_TITLE = {
+  weight: 800,
+  cap: 130, // biggest font size (px) when icons are at scale 1
+  widthRatio: 0.86, // the name never gets wider than this part of the icon area
+  stroke: 3.4, // outline thickness
+  strokeAlpha: 0.92,
+  fillAlpha: 0.26,
+  appear: 0.17, // seconds the letters take to fly in
+  spread: 2.2, // how far apart the letters start
+  grow: 1.1, // how much bigger the letters start
+  fadeOut: 0.3, // seconds the last name takes to fade when the intro ends
 };
 
 /* Dust physics */

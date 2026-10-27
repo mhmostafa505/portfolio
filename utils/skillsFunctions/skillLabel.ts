@@ -1,5 +1,5 @@
 import { clamp } from "./math";
-import { LABEL } from "@/content/skillsContents";
+import { HOVER, LABEL } from "@/content/skillsContents";
 import type { IconState, Skill } from "@/types/skillsTypes";
 
 interface Dot {
@@ -30,7 +30,7 @@ const END = LABEL.approach + LABEL.duration;
 const PROBE = 4; // the letters are measured at 4x, so the particles follow the letter shapes closely
 
 // The color of each letter. A list is spread over the letters (5 colors on "Figma" = one each)
-function letterColors(skill: Skill, count: number): string[] {
+export function letterColors(skill: Skill, count: number): string[] {
   const colors = skill.labelColors?.length ? skill.labelColors : [skill.color];
   return Array.from(
     { length: count },
@@ -55,6 +55,7 @@ export class SkillLabel {
   private fontSize: number = LABEL.size;
   private active = -1;
   private time = 0;
+  private below = true;
 
   constructor(canvas: HTMLCanvasElement, skills: Skill[]) {
     const ctx = canvas.getContext("2d");
@@ -86,6 +87,7 @@ export class SkillLabel {
         this.active = hovered;
         this.time = 0;
         this.sparks = [];
+        this.below = this.fitsBelow(hovered, icons[hovered]);
       }
       this.time = Math.min(END, this.time + dt);
     } else {
@@ -96,6 +98,14 @@ export class SkillLabel {
     if (this.active >= 0 && this.time > 0)
       this.drawName(dt, icons[this.active]);
     this.drawSparks(dt);
+  }
+
+  // Below the icon if the name fits there, otherwise above. Decided once per hover, so it never flips
+  private fitsBelow(index: number, icon: IconState) {
+    const name = this.build(index);
+    const text = name ? name.inkBottom - name.inkTop : this.fontSize;
+    const half = (icon.size * HOVER.scale) / 2; // the hovered icon grows
+    return icon.y + half + LABEL.gap + text + 12 <= this.height;
   }
 
   private snap(value: number) {
@@ -109,13 +119,11 @@ export class SkillLabel {
 
     // Below the top icons, above the bottom ones. The gap is measured from the letters themselves.
     const half = (icon.size * icon.hs) / 2;
-    const below = icon.cur.y <= this.height * 0.6;
     const left =
       clamp(icon.cur.x, width / 2 + 8, this.width - width / 2 - 8) - width / 2;
-    const top = below
+    const top = this.below
       ? icon.cur.y + half + LABEL.gap - inkTop
       : icon.cur.y - half - LABEL.gap - inkBottom;
-
     const progress = clamp((this.time - LABEL.approach) / LABEL.duration, 0, 1);
     const count = Math.floor(progress * dots.length);
 
