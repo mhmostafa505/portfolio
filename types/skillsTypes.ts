@@ -13,6 +13,8 @@ export interface Skill {
   invert?: boolean;
   // The center icon. It loads last, bigger and with a longer slam. Use it on one skill.
   hero?: boolean;
+  // Optional letter colors, spread over the letters of the name (Figma: one per letter)
+  labelColors?: string[];
 }
 
 export interface LayoutSlot {
@@ -52,10 +54,8 @@ export interface Particle {
 }
 
 export interface FieldEvents {
-  onStart: () => void;
   onSlam: (skill: Skill, order: number) => void;
   onIntroEnd: () => void;
-  onHover: (index: number | null) => void;
 }
 
 export interface LayoutPreset {

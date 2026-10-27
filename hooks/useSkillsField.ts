@@ -15,10 +15,17 @@ interface Options {
   stageRef: RefObject<HTMLDivElement | null>;
   bgRef: RefObject<HTMLCanvasElement | null>;
   fgRef: RefObject<HTMLCanvasElement | null>;
+  nameRef: RefObject<HTMLCanvasElement | null>;
   events: FieldEvents;
 }
 
-export function useSkillsField({ stageRef, bgRef, fgRef, events }: Options) {
+export function useSkillsField({
+  stageRef,
+  bgRef,
+  fgRef,
+  nameRef,
+  events,
+}: Options) {
   const eventsRef = useRef(events);
   useEffect(() => {
     eventsRef.current = events;
@@ -28,23 +35,20 @@ export function useSkillsField({ stageRef, bgRef, fgRef, events }: Options) {
     const stage = stageRef.current;
     const bg = bgRef.current;
     const fg = fgRef.current;
-    if (!stage || !bg || !fg) return;
+    const name = nameRef.current;
+    if (!stage || !bg || !fg || !name) return;
 
     let introRunning = false;
-    const field = new ParticleField(bg, fg, SKILLS, {
-      onStart: () => {
-        introRunning = true;
-        eventsRef.current.onStart();
-      },
+    const field = new ParticleField(bg, fg, name, SKILLS, {
       onSlam: (skill, order) => eventsRef.current.onSlam(skill, order),
       onIntroEnd: () => {
         introRunning = false;
         eventsRef.current.onIntroEnd();
       },
-      onHover: (index) => eventsRef.current.onHover(index),
     });
 
     let cancelled = false;
+    let started = false;
     let ready = false; // icons decoded
     let triggered = false; // the user stopped on the section: intro is allowed to run
     let ratio = 0; // how much of the stage is on screen
@@ -52,8 +56,13 @@ export function useSkillsField({ stageRef, bgRef, fgRef, events }: Options) {
 
     const sync = () => {
       if (!ready || !triggered) return;
-      if (ratio > 0) field.start();
-      else field.pause();
+      if (ratio > 0) {
+        if (!started) {
+          started = true;
+          introRunning = true;
+        }
+        field.start();
+      } else field.pause();
     };
 
     const align = () => {
@@ -125,5 +134,5 @@ export function useSkillsField({ stageRef, bgRef, fgRef, events }: Options) {
       stage.removeEventListener("pointercancel", onLeave);
       field.destroy();
     };
-  }, [stageRef, bgRef, fgRef]);
+  }, [stageRef, bgRef, fgRef, nameRef]);
 }

@@ -1,5 +1,6 @@
 import { buildLayout } from "./skillsLayout";
 import { clamp, damp, hexToRgb, mixRgb } from "./math";
+import { SkillLabel } from "./skillLabel";
 import { Starfield } from "./Starfield";
 import {
   FLOAT,
@@ -32,6 +33,7 @@ export class ParticleField {
   private readonly icons: IconState[];
   private readonly stars = new Starfield();
   private readonly order: number[] = [];
+  private readonly label: SkillLabel;
 
   private particles: Particle[] = [];
   private image: ImageData | null = null;
@@ -61,6 +63,7 @@ export class ParticleField {
   constructor(
     bg: HTMLCanvasElement,
     fg: HTMLCanvasElement,
+    nameCanvas: HTMLCanvasElement,
     skills: Skill[],
     events: FieldEvents,
   ) {
@@ -73,6 +76,7 @@ export class ParticleField {
     this.events = events;
     this.bgCtx = bgCtx;
     this.fgCtx = fgCtx;
+    this.label = new SkillLabel(nameCanvas, skills);
     this.icons = skills.map((skill) => ({
       skill,
       x: 0,
@@ -143,6 +147,7 @@ export class ParticleField {
     this.stars.resize(width, height);
     this.vp.x = width / 2;
     this.vp.y = height / 2;
+    this.label.resize(width, height, this.unit);
   }
 
   setSamples(samples: IconSample[][]) {
@@ -175,7 +180,6 @@ export class ParticleField {
     if (!this.started) {
       this.started = true;
       this.time = 0;
-      this.events.onStart();
     }
     this.resume();
   }
@@ -244,6 +248,7 @@ export class ParticleField {
     this.updateIcons(dt);
     this.drawBackground(dt, t);
     this.drawParticles(dt, t, live, this.image, this.pixels);
+    this.label.draw(dt, this.hovered, this.icons);
   }
 
   private advanceIntro(t: number) {
@@ -278,7 +283,6 @@ export class ParticleField {
     if (next === this.hovered) return;
     this.hovered = next;
     if (next >= 0) this.tintRgb = hexToRgb(this.skills[next].color);
-    this.events.onHover(next >= 0 ? next : null);
   }
 
   private updateIcons(dt: number) {

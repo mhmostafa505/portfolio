@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import LetterBoxBars from "./SkillsLetterBoxBars";
 import { useSkillsField } from "@/hooks/useSkillsField";
 import { flash, shake } from "@/utils/skillsFunctions/effects";
 import { SKILLS, STAGE } from "@/content/skillsContents";
@@ -11,17 +10,15 @@ const SkillsField = () => {
   const stageRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLCanvasElement>(null);
   const fgRef = useRef<HTMLCanvasElement>(null);
+  const nameRef = useRef<HTMLCanvasElement>(null);
   const worldRef = useRef<HTMLDivElement>(null);
   const flashRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLParagraphElement>(null);
 
-  const [introActive, setIntroActive] = useState(false);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [settled, setSettled] = useState(false);
 
   const events = useMemo<FieldEvents>(
     () => ({
-      onStart: () => setIntroActive(true),
       onSlam: (skill) => {
         const hero = Boolean(skill.hero);
         if (labelRef.current) {
@@ -33,19 +30,16 @@ const SkillsField = () => {
       },
       onIntroEnd: () => {
         setSettled(true);
-        setIntroActive(false);
         if (labelRef.current) labelRef.current.style.opacity = "0";
         flash(flashRef.current, 0.6, 450);
       },
-      onHover: setHoveredIndex,
     }),
     [],
   );
 
-  useSkillsField({ stageRef, bgRef, fgRef, events });
+  useSkillsField({ stageRef, bgRef, fgRef, nameRef, events });
 
   const introHeight = STAGE.introHeight;
-  const hoveredSkill = hoveredIndex === null ? null : SKILLS[hoveredIndex];
 
   return (
     <div
@@ -68,17 +62,18 @@ const SkillsField = () => {
           aria-hidden
           className="absolute inset-0 h-full w-full"
         />
+        <canvas
+          ref={nameRef}
+          className="absolute inset-0 h-full w-full"
+          aria-hidden
+        />
+
         <p
           ref={labelRef}
           aria-hidden
           className="pointer-events-none absolute inset-x-0 bottom-[14%] text-center text-xl font-medium tracking-[0.25em] opacity-0"
         />
       </div>
-
-      {/* <LetterBoxBars
-        open={introActive || hoveredIndex !== null}
-        skill={hoveredSkill}
-      /> */}
 
       <div
         ref={flashRef}

@@ -39,7 +39,13 @@ export const SKILLS: Skill[] = [
   { id: "docker", name: "Docker", src: "/skills/docker.svg", color: "#2496ED" },
   { id: "git", name: "Git", src: "/skills/git.svg", color: "#F05032" },
   { id: "vite", name: "Vite", src: "/skills/vitejs.svg", color: "#646CFF" },
-  { id: "figma", name: "Figma", src: "/skills/figma.svg", color: "#F24E1E" },
+  {
+    id: "figma",
+    name: "Figma",
+    src: "/skills/figma.svg",
+    color: "#F24E1E",
+    labelColors: ["#F24E1E", "#FF7262", "#A259FF", "#1ABCFE", "#0ACF83"],
+  },
   {
     id: "adobexd",
     name: "Adobe XD",
@@ -130,3 +136,17 @@ export const LAYOUT_EVENNESS = 6;
 // Sizes cycle through these so icons don't look like a flat grid
 export const DEPTHS = [0.92, 1.05, 0.95, 1, 0.9, 1.08];
 export const HERO_DEPTH = 1.3;
+
+/* Hover name (the spark writer) */
+export const LABEL = {
+  size: 28, // px at the normal icon size
+  weight: 700, // bold letters keep the holes in "e" and "a" open
+  gap: 28, // space between the icon and the top (or bottom) of the letters
+  dotStep: 1.5, // distance between particles, in px (smaller = denser)
+  dotSize: 1.6, // size of one particle, in px
+  approach: 0.15, // seconds for the spark to fly from the icon to the first letter
+  duration: 0.85, // seconds to write the whole name
+  eraseSpeed: 3.2, // erasing is this many times faster than writing
+  sparksPerSecond: 120,
+  sparkLife: 0.45,
+};

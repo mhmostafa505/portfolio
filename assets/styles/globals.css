@@ -29,8 +29,6 @@
 /* while the navbar jumps over the projects section, its tall scroll area is collapsed */
 [data-projects-track][data-skip="true"] {
   height: 100svh !important;
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
 }
 
 /* Need This for Custom Cursor */
