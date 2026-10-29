@@ -1,6 +1,16 @@
 const TRACK = "[data-projects-track]";
+const SCROLL_KEYS = new Set([
+  "ArrowUp",
+  "ArrowDown",
+  "PageUp",
+  "PageDown",
+  "Home",
+  "End",
+  " ",
+]);
 let latest = 0;
 let chain: Promise<unknown> = Promise.resolve();
+let stopCurrent: (() => void) | null = null;
 
 const absTop = (el: HTMLElement) =>
   el.getBoundingClientRect().top + window.scrollY;
@@ -37,7 +47,37 @@ const waitForScrollEnd = (maxMs = 3500) =>
     requestAnimationFrame(tick);
   });
 
-async function run(target: HTMLElement | number, extra: number) {
+// the user scrolls by hand (or another click happens): stop the smooth scroll right where it is
+function watchForTakeover() {
+  let done: () => void = () => {};
+  const promise = new Promise<void>((resolve) => {
+    done = resolve;
+  });
+  const stop = () => {
+    window.scrollTo({ top: window.scrollY, behavior: "instant" });
+    done();
+  };
+  const onInput = (e: Event) => {
+    if (e instanceof KeyboardEvent && !SCROLL_KEYS.has(e.key)) return;
+    if (e.type === "mousedown" && e.target !== document.documentElement) return; // only the scrollbar
+    stop();
+  };
+  const events = ["wheel", "touchstart", "mousedown", "keydown"] as const;
+  events.forEach((ev) =>
+    window.addEventListener(ev, onInput, { passive: true }),
+  );
+  return {
+    promise,
+    stop,
+    off: () => events.forEach((ev) => window.removeEventListener(ev, onInput)),
+  };
+}
+
+async function go(
+  target: HTMLElement | number,
+  extra: number,
+  settle: () => Promise<unknown>,
+) {
   const behavior: ScrollBehavior = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   ).matches
@@ -47,7 +87,7 @@ async function run(target: HTMLElement | number, extra: number) {
     typeof target === "number" ? target : topOf(target, extra);
   const plain = async () => {
     window.scrollTo({ top: getY(), behavior });
-    await waitForScrollEnd();
+    await settle();
   };
 
   const track = document.querySelector<HTMLElement>(TRACK);
@@ -101,14 +141,28 @@ async function run(target: HTMLElement | number, extra: number) {
   }
 }
 
+async function run(target: HTMLElement | number, extra: number) {
+  const watch = watchForTakeover();
+  stopCurrent = watch.stop;
+  try {
+    await go(target, extra, () =>
+      Promise.race([waitForScrollEnd(), watch.promise]),
+    );
+  } finally {
+    watch.off();
+    if (stopCurrent === watch.stop) stopCurrent = null;
+  }
+}
+
 /**
  * target: the section element, or a number like 0 for "top of the page"
  * extra: extra px to stop above the target (for example a fixed navbar height)
  * Returns a promise that resolves when the page has stopped moving.
- * If you call it again quickly, only the last call runs.
+ * A new call stops the one that is still running, and only the last call runs.
  */
 export function navigateTo(target: HTMLElement | number, extra = 0) {
   const id = ++latest;
+  stopCurrent?.();
   chain = chain
     .then(() => (id === latest ? run(target, extra) : undefined))
     .catch(() => {});

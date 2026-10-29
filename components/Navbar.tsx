@@ -11,10 +11,12 @@ import { BiMessage } from "react-icons/bi";
 import { navbarItemsContent } from "@/content/navbarContents";
 
 const Navbar = () => {
-  const { activeId, goTo } = useScrollSpy();
+  const { activeId, ready, goTo } = useScrollSpy();
   const [scrolled, setScrolled] = useState(false);
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);
+
+  const current = ready ? activeId : "";
 
   useEffect(() => {
     const onScroll = () => {
@@ -66,7 +68,7 @@ const Navbar = () => {
                 goTo(item.activeIdName);
               }}
               data-cursor="pointer"
-              className={`${activeId === item.activeIdName ? "text-primary-hover" : ""} flex items-center gap-1.5 hover:text-primary-hover`}
+              className={`${current === item.activeIdName ? "text-primary-hover" : ""} flex items-center gap-1.5 hover:text-primary-hover`}
             >
               {item.activeIdName === "home" ? (
                 <AiOutlineHome size={18} />
@@ -86,7 +88,7 @@ const Navbar = () => {
               {item.name}
             </Link>
             <div
-              className={`${activeId === item.activeIdName ? "scale-x-100" : "scale-x-0"} w-full h-0.5 rounded-full bg-primary-hover transition-all duration-500 ease-in-out`}
+              className={`${activeId === item.activeIdName ? "scale-x-100" : "scale-x-0"} w-full h-0.5 rounded-full bg-primary-hover transition-all duration-300 ease-in-out`}
             ></div>
           </div>
         ))}

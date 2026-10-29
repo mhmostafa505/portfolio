@@ -6,10 +6,11 @@ import {
   useRef,
   useState,
 } from "react";
-import { navigateTo } from "@/utils/myProjectsNavigateToFunction";
+import { navigateTo } from "@/utils/navigateToFunction";
 
 interface ScrollSpyValue {
   activeId: string;
+  ready: boolean;
   revealed: Set<string>;
   registerSection: (id: string, el: HTMLElement | null) => void;
   goTo: (id: string) => void;
@@ -17,6 +18,7 @@ interface ScrollSpyValue {
 
 const ScrollSpyContext = createContext<ScrollSpyValue>({
   activeId: "home",
+  ready: false,
   revealed: new Set(),
   registerSection: () => {},
   goTo: () => {},
@@ -30,15 +32,16 @@ export const ScrollSpyProvider = ({
   children: React.ReactNode;
 }) => {
   const [activeId, setActiveId] = useState(HOME_ID);
+  const [ready, setReady] = useState(false);
   const [revealed, setRevealed] = useState<Set<string>>(
     () => new Set([HOME_ID]),
   );
-
   const [intersecting] = useState<Map<string, DOMRectReadOnly>>(
     () => new Map(),
   );
 
   const navId = useRef(0);
+  const initialized = useRef(false);
 
   const [observer] = useState<IntersectionObserver | null>(() => {
     if (typeof window === "undefined") return null;
@@ -69,6 +72,7 @@ export const ScrollSpyProvider = ({
             : closest;
         });
 
+        setReady(true);
         setActiveId(bestId);
         history.replaceState(
           null,
@@ -92,6 +96,16 @@ export const ScrollSpyProvider = ({
     (id: string, el: HTMLElement | null) => {
       if (!el || !observer) return;
       observer.observe(el);
+
+      // first section to mount: start from the URL hash, so a reload shows the right highlight immediately
+      if (!initialized.current) {
+        initialized.current = true;
+        const fromHash = window.location.hash.slice(1);
+        if (fromHash && document.getElementById(fromHash)) {
+          setActiveId(fromHash);
+        }
+        setReady(true);
+      }
     },
     [observer],
   );
@@ -130,7 +144,7 @@ export const ScrollSpyProvider = ({
 
   return (
     <ScrollSpyContext.Provider
-      value={{ activeId, revealed, registerSection, goTo }}
+      value={{ activeId, ready, revealed, registerSection, goTo }}
     >
       {children}
     </ScrollSpyContext.Provider>

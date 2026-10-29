@@ -127,7 +127,7 @@ export class ParticleField {
     const layout = buildLayout(this.skills, mode, boxW, boxH);
     this.unit = layout.scale;
     const offsetX = (width - boxW) / 2;
-    const offsetY = topInset + (areaH - boxH) / 2;
+    const offsetY = (height - boxH) / 2;
     const slamSize = layout.baseSize * this.unit * INTRO.slamSize;
 
     for (const icon of this.icons) {
