@@ -13,7 +13,18 @@ export const onScroll = ({
   navTimer,
   setActive,
 }: OnScrollFunctionType) => {
-  if (trackRef.current?.dataset.skip === "true") return;
+  const skip = trackRef.current?.dataset.skip;
+  if (skip) {
+    // a navbar jump is passing over this section: show the project of the side it is going to
+    const index = skip === "start" ? 0 : projects.length - 1;
+    setActive((prev) =>
+      prev.index === index
+        ? prev
+        : { index, direction: index > prev.index ? 1 : -1 },
+    );
+    return;
+  }
+
   const track = trackRef.current;
   if (!track) return;
 

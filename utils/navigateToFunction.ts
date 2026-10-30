@@ -91,11 +91,7 @@ async function go(
   };
 
   const track = document.querySelector<HTMLElement>(TRACK);
-  if (
-    !track ||
-    (typeof target !== "number" &&
-      (target.contains(track) || track.contains(target)))
-  )
+  if (!track || (typeof target !== "number" && track.contains(target)))
     return plain();
 
   const vh = window.innerHeight;
@@ -104,19 +100,22 @@ async function go(
   const y0 = window.scrollY;
   const y1 = getY();
 
-  // only when the jump goes from one side of the projects section to the other
-  const crossing =
-    (y0 <= trackTop && y1 >= pinEnd) || (y0 >= pinEnd && y1 <= trackTop);
-  if (!crossing) return plain();
+  // skip the scroll lock whenever the way to the target goes through the projects section, or starts inside it
+  const passesThrough =
+    Math.min(y0, y1) < pinEnd && Math.max(y0, y1) > trackTop;
+  if (!passesThrough) return plain();
 
   const html = document.documentElement;
   html.style.overflowAnchor = "none"; // so the browser doesn't also adjust the scroll by itself
+  html.dataset.navigating = "true"; // hides the scrollbar thumb while the page height changes
+  const toStart = y1 <= trackTop + vh * 0.5; // going to / before the section, or after it?
   let collapsedHeight = html.scrollHeight;
 
   try {
     // 1. collapse the tall track
     const before = html.scrollHeight;
-    track.dataset.skip = "true";
+    track.dataset.skip = toStart ? "start" : "end";
+    window.dispatchEvent(new Event("scroll")); // shows the right project right away
     collapsedHeight = html.scrollHeight; // reading this forces the new layout
     if (y0 >= pinEnd) {
       // we are below the track: move up by the same amount so the screen looks identical
@@ -124,6 +123,9 @@ async function go(
         top: y0 - (before - collapsedHeight),
         behavior: "instant",
       });
+    } else if (y0 > trackTop) {
+      // we are inside the pinned part: the collapsed section is one screen tall, and its top looks exactly like the pinned box, so the screen stays the same
+      window.scrollTo({ top: trackTop, behavior: "instant" });
     }
 
     // 2. scroll to the target (the section is only one screen tall now)
@@ -137,7 +139,11 @@ async function go(
     if (endedBelow) {
       window.scrollTo({ top: window.scrollY + grown, behavior: "instant" });
     }
+
     html.style.overflowAnchor = "";
+    html.removeAttribute("data-navigating");
+
+    window.dispatchEvent(new Event("scroll")); // normal behavior is back: the project follows the real position
   }
 }
 
