@@ -2,13 +2,13 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useScrollSpy } from "@/contexts/ScrollSpyContext";
+import { navbarItemsContent } from "@/content/navbarContents";
 import { AiOutlineHome } from "react-icons/ai";
 import { LuUserRound } from "react-icons/lu";
 import { TbBook } from "react-icons/tb";
 import { MdOutlineEventNote } from "react-icons/md";
 import { LiaToolsSolid } from "react-icons/lia";
 import { BiMessage } from "react-icons/bi";
-import { navbarItemsContent } from "@/content/navbarContents";
 
 const Navbar = () => {
   const { activeId, ready, goTo } = useScrollSpy();
