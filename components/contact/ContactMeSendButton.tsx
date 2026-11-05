@@ -30,6 +30,7 @@ const ContactMeSendButton = ({
       ref={buttonRef}
       type={type}
       data-cursor="pointer"
+      data-load
       disabled={disabled}
       onClick={onClick}
       {...handlers}

@@ -123,14 +123,14 @@ export const CONTACT_TOPICS: ContactTopic[] = [
 export const CONTACT_DETAILS: ContactDetail[] = [
   {
     id: "email",
-    value: "name@gmail.com",
+    value: "mhmostafa505@gmail.com",
     iconClass: "text-primary-purple",
     hoverClass: "hover:border-primary-purple",
     copiedClass: "border-primary-purple",
   },
   {
     id: "telegram",
-    value: "@yourhandle",
+    value: "@ZonseWhakamateBegraben",
     iconClass: "text-primary-hover",
     hoverClass: "hover:border-primary-hover",
     copiedClass: "border-primary-hover",
@@ -164,4 +164,30 @@ export const SEND_RISE_COLORS = [
   "var(--color-primary-yellow)",
   "var(--color-primary-hover)",
   "var(--color-primary-purple)",
+];
+
+// Class that keeps the section hidden until the initial load starts (used in ContactMe.tsx)
+export const CONTACT_LOAD_PENDING_CLASS = "contact-load-pending";
+
+// Initial load of the contact section (ink drops + highlighter). Change these numbers to tweak it
+export const CONTACT_LOAD = {
+  startThreshold: 0.6, // an item starts loading when this much of it is on screen (0 to 1)
+  startMargin: "0px 0px -8% 0px", // shrinks the screen bottom, so items start a bit after entering
+  batchWaitMs: 60, // items that enter together are loaded together
+  dropEveryMs: 200, // time between two ink drops
+  fallMs: 520, // how long one drop falls (the splash and highlighter start right after it)
+  fallPx: 320, // how far above its element each drop starts
+  barMs: 720, // highlighter cover + wipe time
+  coverAt: 0.45, // moment (0 to 1 of barMs) when the bar fully covers the element
+  splashDroplets: 8, // tiny droplets in each splash
+  roundedWipe: true, // true = bar keeps the element's rounded corners, false = old flat bar
+  // Where each drop lands on its element (0 = left edge, 1 = right edge), repeats if there are more elements
+  dropX: [0.3, 0.66, 0.45, 0.76, 0.36, 0.6, 0.26, 0.54, 0.72, 0.4],
+} as const;
+
+// Colors of the drops and bars (an element can pick its own with data-load-color)
+export const CONTACT_LOAD_COLORS = [
+  "var(--color-primary-hover)",
+  "var(--color-primary-purple)",
+  "var(--color-primary-yellow)",
 ];

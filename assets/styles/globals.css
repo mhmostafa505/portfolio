@@ -630,3 +630,8 @@ body {
     animation: none;
   }
 }
+
+/* Contact section: items stay hidden until the initial load reaches them */
+.contact-load-pending [data-load]:not([data-load-started]) {
+  visibility: hidden;
+}

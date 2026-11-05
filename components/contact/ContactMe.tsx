@@ -6,6 +6,7 @@ import ContactMeAutoInput from "./ContactMeAutoInput";
 import ContactMeSendButton from "./ContactMeSendButton";
 import useContactForm from "@/hooks/useContactForm";
 import useCopyToClipboard from "@/hooks/useCopyToClipboard";
+import useContactMeLoad from "@/hooks/useContactMeLoad";
 import {
   CONTACT_DETAILS,
   CONTACT_LIMITS,
@@ -20,7 +21,7 @@ import {
 import { FiAlertCircle, FiCheck, FiCopy, FiMail } from "react-icons/fi";
 import { FaTelegramPlane } from "react-icons/fa";
 
-const pills = ["#Gmail", "#Telegram", "#Discord"];
+const pills = ["#Gmail", "#Message", "#Telegram"];
 
 const ContactMe = () => {
   const { registerSection } = useScrollSpy();
@@ -42,6 +43,9 @@ const ContactMe = () => {
     handleHoneypotChange,
     handleSubmit,
   } = useContactForm();
+
+  // Starts the initial load of each item when it scrolls into view
+  const { loadRef } = useContactMeLoad();
 
   // "Copied" feedback for the email / telegram buttons under the form
   const { status: copyStatus, copy } = useCopyToClipboard(
@@ -70,8 +74,11 @@ const ContactMe = () => {
     ) : null;
 
   const setContactRef = useCallback(
-    (el: HTMLElement | null) => registerSection("contact", el),
-    [registerSection],
+    (el: HTMLElement | null) => {
+      registerSection("contact", el);
+      loadRef(el);
+    },
+    [registerSection, loadRef],
   );
 
   // Message box grows while typing, then starts scrolling at the max height
@@ -88,7 +95,7 @@ const ContactMe = () => {
     <section
       id="contact"
       ref={setContactRef}
-      className="mt-10 mb-40 scroll-mt-37"
+      className="contact-load-pending relative mt-10 mb-40 scroll-mt-34"
     >
       {/* Title and Pills */}
       <SectionHeader
@@ -128,7 +135,7 @@ const ContactMe = () => {
         {/* Sentence: name + email/telegram */}
         <div className="text-xl leading-[2.4] sm:text-2xl sm:leading-[2.4]">
           {/* Step 1: name */}
-          <span className={stepClass(0)}>
+          <span data-load className={stepClass(0)}>
             Hi, I&apos;m{" "}
             <ContactMeAutoInput
               value={values.name}
@@ -144,7 +151,7 @@ const ContactMe = () => {
             />
           </span>{" "}
           {/* Step 2: email or telegram (icon shows what was detected) */}
-          <span className={stepClass(1)}>
+          <span data-load className={stepClass(1)}>
             and you can reach me at{" "}
             <ContactMeAutoInput
               value={values.reach}
@@ -166,7 +173,7 @@ const ContactMe = () => {
             .
           </span>{" "}
           {/* Step 3: topic (the three options are words inside the sentence) */}
-          <div className={stepClass(2)}>
+          <div data-load className={stepClass(2)}>
             I&apos;d like to talk about{" "}
             <span role="group" aria-label="What would you like to talk about?">
               {CONTACT_TOPICS.map((topic, index) => {
@@ -201,6 +208,7 @@ const ContactMe = () => {
         <div className={`mt-9 ${stepClass(3)}`}>
           <p
             id="contact-message-label"
+            data-load
             className="mb-3 text-[22px] sm:text-2xl"
           >
             Here&apos;s the full story:
@@ -208,6 +216,7 @@ const ContactMe = () => {
 
           <textarea
             id="contact-message"
+            data-load
             aria-labelledby="contact-message-label"
             ref={messageRef}
             value={values.message}
@@ -223,6 +232,7 @@ const ContactMe = () => {
 
           {/* Character counter (turns yellow near the limit) */}
           <div
+            data-load
             className={`mt-2.5 mr-2 text-right text-xs ${
               messageLength >= CONTACT_LIMITS.message.max * 0.9
                 ? "text-primary-yellow"
@@ -233,7 +243,10 @@ const ContactMe = () => {
           </div>
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-            <span className="min-w-0 text-lg text-primary-white/60 wrap-anywhere">
+            <span
+              data-load
+              className="min-w-0 text-lg text-primary-white/60 wrap-anywhere"
+            >
               Thanks,{" "}
               <span className="text-primary-yellow">
                 {values.name.trim() || "you"}
@@ -264,10 +277,10 @@ const ContactMe = () => {
 
       {/* Not a form person? Copy my email or telegram */}
       <div className="mt-10 border-t border-dashed border-primary-white/15 pt-6">
-        <p className="mb-1 text-lg text-primary-white">
+        <p data-load className="mb-1 text-lg text-primary-white">
           Forms not your thing? Fair enough.
         </p>
-        <p className="mb-3.5 text-sm text-primary-white/60">
+        <p data-load className="mb-3.5 text-sm text-primary-white/60">
           Grab one of these and message me the old-fashioned way. Click to copy.
         </p>
 
@@ -282,6 +295,7 @@ const ContactMe = () => {
                 key={detail.id}
                 type="button"
                 data-cursor="pointer"
+                data-load
                 onClick={() => copy(detail.id, detail.value)}
                 aria-label={`Copy ${detail.value}`}
                 className={`inline-flex cursor-pointer items-center gap-2.5 rounded-[10px] border px-4 py-2.5 text-sm text-primary-white transition-colors ${
