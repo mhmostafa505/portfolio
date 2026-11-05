@@ -136,3 +136,32 @@ export const CONTACT_DETAILS: ContactDetail[] = [
     copiedClass: "border-primary-hover",
   },
 ];
+
+// Send button hover settings (change these numbers to tweak the feel)
+export const SEND_BUTTON_FX = {
+  rippleGrowSpeed: 10, // how fast the teal circle grows
+  rippleShrinkSpeed: 8, // how fast it shrinks when the mouse leaves
+  rippleMoveSpeed: 14, // how fast the circle center slides to the exit point
+  riseEveryMs: 300, // one rising message icon every X ms while hovering
+  riseMaxAlive: 12, // never show more than this many at once
+  riseMinSize: 11,
+  riseMaxSize: 20,
+  riseMinDuration: 2200,
+  riseMaxDuration: 3000,
+  eyeRange: 40, // mouse distance (px) where the pupils reach their max move
+  eyeMaxMove: 1.3, // how far the pupils move
+  eyeFollowSpeed: 16, // how fast the pupils catch up with the mouse (higher = snappier)
+  // Keeps the draw loop in phase after hover (matches the 2.8s loop in globals.css)
+  drawResumeDelays: [-1.82, -1.37, -1.22],
+} as const;
+
+// Message icon shape (used by the button icon and the rising icons)
+export const SEND_ICON_PATH =
+  "M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-8l-5 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z";
+
+// Colors of the rising icons
+export const SEND_RISE_COLORS = [
+  "var(--color-primary-yellow)",
+  "var(--color-primary-hover)",
+  "var(--color-primary-purple)",
+];

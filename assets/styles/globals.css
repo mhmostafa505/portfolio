@@ -575,3 +575,58 @@ body {
     transform: none;
   }
 }
+
+/* Contact Me: Send Message Button Animations */
+/* icon draw / undraw loop */
+@keyframes send-draw {
+  0% {
+    stroke-dashoffset: 1.1;
+  }
+  35% {
+    stroke-dashoffset: 0;
+  }
+  65% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 1.1;
+  }
+}
+.send-draw {
+  stroke-dasharray: 1 1.2;
+  stroke-dashoffset: 1.1;
+  animation: send-draw 2.8s ease-in-out infinite;
+}
+.send-draw-1 {
+  animation-delay: 0.45s;
+}
+.send-draw-2 {
+  animation-delay: 0.6s;
+}
+
+/* Send button: eye blink and pupil follow */
+@keyframes send-blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  97% {
+    transform: scaleY(0.1);
+  }
+}
+.send-eye {
+  animation: send-blink 3.4s infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .send-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .send-eye {
+    animation: none;
+  }
+}

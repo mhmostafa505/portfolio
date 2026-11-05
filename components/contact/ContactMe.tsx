@@ -3,6 +3,7 @@ import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useScrollSpy } from "@/contexts/ScrollSpyContext";
 import SectionHeader from "../SectionHeader";
 import ContactMeAutoInput from "./ContactMeAutoInput";
+import ContactMeSendButton from "./ContactMeSendButton";
 import useContactForm from "@/hooks/useContactForm";
 import useCopyToClipboard from "@/hooks/useCopyToClipboard";
 import {
@@ -239,16 +240,14 @@ const ContactMe = () => {
               </span>
             </span>
 
-            <button
-              type="submit"
-              data-cursor="pointer"
+            {/* Send Message Buttons */}
+            <ContactMeSendButton
               disabled={isLocked(3)}
-              className="cursor-pointer rounded-lg bg-primary-yellow px-6 py-2.5 text-[15px] font-medium text-primary-bg disabled:cursor-default"
-            >
-              {isSending ? CONTACT_TEXTS.sending : CONTACT_TEXTS.send}
-            </button>
+              label={isSending ? CONTACT_TEXTS.sending : CONTACT_TEXTS.send}
+            />
           </div>
         </div>
+
         {/* Error / success message (outside the dimmed steps so it stays clear) */}
         <p
           role="status"
