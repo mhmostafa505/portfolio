@@ -114,14 +114,43 @@ export function useSkillsField({
       onIdle();
     });
 
-    const onMove = (e: PointerEvent) => {
+    // The mouse position is kept relative to the window, so scrolling can be handled
+    let clientX: number | null = null;
+    let clientY = 0;
+
+    const syncPointer = () => {
+      if (clientX === null) {
+        field.setPointer(null);
+        return;
+      }
+      // Is the stage really under the mouse? (it may have scrolled away or be behind the navbar)
+      const el = document.elementFromPoint(clientX, clientY);
+      if (!el || !stage.contains(el)) {
+        field.setPointer(null);
+        return;
+      }
       const rect = bg.getBoundingClientRect();
-      field.setPointer({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+      field.setPointer({ x: clientX - rect.left, y: clientY - rect.top });
     };
-    const onLeave = () => field.setPointer(null);
+
+    const onMove = (e: PointerEvent) => {
+      clientX = e.clientX;
+      clientY = e.clientY;
+      syncPointer();
+    };
+    const onLeave = () => {
+      clientX = null;
+      field.setPointer(null);
+    };
+
     stage.addEventListener("pointermove", onMove);
     stage.addEventListener("pointerleave", onLeave);
     stage.addEventListener("pointercancel", onLeave);
+    // The page can scroll under a still mouse, and no pointer event fires then
+    window.addEventListener("scroll", syncPointer, {
+      passive: true,
+      capture: true,
+    });
 
     return () => {
       cancelled = true;
@@ -132,6 +161,7 @@ export function useSkillsField({
       stage.removeEventListener("pointermove", onMove);
       stage.removeEventListener("pointerleave", onLeave);
       stage.removeEventListener("pointercancel", onLeave);
+      window.removeEventListener("scroll", syncPointer, true);
       field.destroy();
     };
   }, [stageRef, bgRef, fgRef, nameRef]);

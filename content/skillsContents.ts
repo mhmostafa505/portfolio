@@ -166,4 +166,5 @@ export const LABEL = {
   eraseSpeed: 3.2, // erasing is this many times faster than writing
   sparksPerSecond: 120,
   sparkLife: 0.45,
+  jumpSpeed: 1, // the pen crosses gaps between strokes this much faster than it writes (lower = slower glide)
 };

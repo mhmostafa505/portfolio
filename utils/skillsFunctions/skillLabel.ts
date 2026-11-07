@@ -21,6 +21,8 @@ interface Spark {
 // One skill's name as particles, in the order the pen writes them
 interface Name {
   dots: Dot[];
+  cum: number[]; // time position of each particle along the pen's route
+  total: number;
   width: number;
   inkTop: number;
   inkBottom: number;
@@ -125,7 +127,10 @@ export class SkillLabel {
       ? icon.cur.y + half + LABEL.gap - inkTop
       : icon.cur.y - half - LABEL.gap - inkBottom;
     const progress = clamp((this.time - LABEL.approach) / LABEL.duration, 0, 1);
-    const count = Math.floor(progress * dots.length);
+    // How far the pen has traveled, and how many particles it has passed
+    const target = progress * name.total;
+    let count = 0;
+    while (count < dots.length && name.cum[count] <= target) count++;
 
     const ctx = this.ctx;
     let color = "";
@@ -157,10 +162,14 @@ export class SkillLabel {
       y = icon.cur.y + (top + first.y - icon.cur.y) * f;
       sparkColor = first.color;
     } else {
-      const p = dots[Math.min(count, dots.length - 1)];
-      x = left + p.x;
-      y = top + p.y;
-      sparkColor = p.color;
+      // The pen glides between particles (also across gaps), so it never jumps
+      const a = Math.max(0, count - 1);
+      const b = Math.min(count, dots.length - 1);
+      const span = name.cum[b] - name.cum[a];
+      const f = span > 0 ? clamp((target - name.cum[a]) / span, 0, 1) : 0;
+      x = left + dots[a].x + (dots[b].x - dots[a].x) * f;
+      y = top + dots[a].y + (dots[b].y - dots[a].y) * f;
+      sparkColor = dots[b].color;
     }
 
     ctx.globalAlpha = 0.45;
@@ -287,12 +296,28 @@ export class SkillLabel {
       current = best;
     }
 
+    // Time along the route follows the distance the pen travels, so it moves at the same
+    // speed on strokes and when it goes back to complete the missing parts
+    const gap = LABEL.dotStep * 2.5;
+    const cum: number[] = [0];
+    for (let i = 1; i < dots.length; i++) {
+      const dist = Math.hypot(
+        dots[i].x - dots[i - 1].x,
+        dots[i].y - dots[i - 1].y,
+      );
+      const cost = dist <= gap ? dist : gap + (dist - gap) * LABEL.jumpSpeed;
+      cum.push(cum[i - 1] + cost);
+    }
+
     const name: Name = {
       dots,
+      cum,
+      total: cum[cum.length - 1] || 1,
       width,
       inkTop: Math.min(...dots.map((d) => d.y - d.size / 2)),
       inkBottom: Math.max(...dots.map((d) => d.y + d.size / 2)),
     };
+
     this.cache.set(index, name);
     return name;
   }
