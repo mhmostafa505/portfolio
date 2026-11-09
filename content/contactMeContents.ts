@@ -191,3 +191,12 @@ export const CONTACT_LOAD_COLORS = [
   "var(--color-primary-purple)",
   "var(--color-primary-yellow)",
 ];
+
+// Texts and size of the Composer window header
+export const CONTACT_COMPOSER = {
+  title: "New message",
+  step: "Step",
+  of: "of",
+  ready: "Ready to send",
+  totalSteps: 4,
+} as const;

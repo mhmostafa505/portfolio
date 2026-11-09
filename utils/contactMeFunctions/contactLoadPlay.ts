@@ -63,6 +63,13 @@ const getLineBoxes = (el: HTMLElement, root: HTMLElement): Box[] => {
   }));
 };
 
+// Box of the whole element (used for the Composer frame)
+const getElementBox = (el: HTMLElement, root: HTMLElement): Box => {
+  const a = el.getBoundingClientRect();
+  const b = root.getBoundingClientRect();
+  return { x: a.left - b.left, y: a.top - b.top, w: a.width, h: a.height };
+};
+
 // Highlighter that keeps the element's rounded corners (covers left to right, then wipes away to the right)
 const getRoundedFrames = (round: string): Keyframe[] => [
   { clipPath: `inset(0% 100% 0% 0% round ${round})`, easing: BAR_EASE },
@@ -111,7 +118,7 @@ export const playContactLoad = (root: HTMLElement, items: HTMLElement[]) => {
   root.appendChild(layer);
 
   const animate = (
-    el: HTMLElement,
+    el: Element,
     frames: Keyframe[],
     options: KeyframeAnimationOptions,
   ) => {
@@ -246,6 +253,88 @@ export const playContactLoad = (root: HTMLElement, items: HTMLElement[]) => {
       { delay: impactAt, duration: CONTACT_LOAD.barMs, easing: "linear" },
     );
   };
+
+  // Border color fades in (used by the Composer frame and its divider lines)
+  const fadeBorder = (
+    el: HTMLElement,
+    prop: "borderColor" | "borderTopColor" | "borderBottomColor",
+  ) => {
+    const readProp = prop === "borderColor" ? "borderTopColor" : prop;
+    const finalColor = getComputedStyle(el)[readProp];
+
+    animate(
+      el,
+      [
+        { [prop]: "transparent" },
+        { [prop]: "transparent", offset: 0.75 },
+        { [prop]: finalColor },
+      ],
+      { duration: 900, easing: "ease-in-out" },
+    );
+  };
+
+  // The Composer frame draws its own yellow outline, then its normal border fades in
+  const addFrame = (frame: HTMLElement, box: Box) => {
+    const svgNS = "http://www.w3.org/2000/svg";
+    const radius = parseFloat(getComputedStyle(frame).borderTopLeftRadius) || 0;
+
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("width", String(box.w));
+    svg.setAttribute("height", String(box.h));
+    svg.style.cssText = `position:absolute;left:${box.x}px;top:${box.y}px;overflow:visible;`;
+
+    const rect = document.createElementNS(svgNS, "rect");
+    rect.setAttribute("x", "0.75");
+    rect.setAttribute("y", "0.75");
+    rect.setAttribute("width", String(box.w - 1.5));
+    rect.setAttribute("height", String(box.h - 1.5));
+    rect.setAttribute("rx", String(radius));
+    rect.setAttribute("fill", "none");
+    rect.setAttribute("stroke-width", "1.5");
+    rect.setAttribute("pathLength", "1");
+    rect.style.stroke = "var(--color-primary-yellow)";
+    rect.style.strokeDasharray = "1";
+    svg.appendChild(rect);
+    layer.appendChild(svg);
+
+    animate(
+      rect,
+      [
+        { strokeDashoffset: 1, opacity: 1 },
+        { strokeDashoffset: 0, opacity: 1, offset: 0.75 },
+        { strokeDashoffset: 0, opacity: 0 },
+      ],
+      { duration: 900, easing: "ease-in-out" },
+    );
+  };
+
+  // Composer window: draw the frame once, together with the first items that live inside it
+  const frames = Array.from(
+    root.querySelectorAll<HTMLElement>(
+      "[data-load-frame]:not([data-load-started])",
+    ),
+  ).filter((frame) => items.some((item) => frame.contains(item)));
+
+  frames.forEach((frame) => {
+    const lines = Array.from(
+      frame.querySelectorAll<HTMLElement>("[data-load-line]"),
+    );
+
+    // The attribute lets the real border colors come back, the animations keep them hidden
+    frame.setAttribute("data-load-started", "");
+    lines.forEach((line) => line.setAttribute("data-load-started", ""));
+
+    addFrame(frame, getElementBox(frame, root));
+    fadeBorder(frame, "borderColor");
+    lines.forEach((line) =>
+      fadeBorder(
+        line,
+        line.dataset.loadLine === "top"
+          ? "borderTopColor"
+          : "borderBottomColor",
+      ),
+    );
+  });
 
   // Measure everything first, then start every animation
   const allBoxes = items.map((el) => getLineBoxes(el, root));

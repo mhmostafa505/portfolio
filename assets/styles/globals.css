@@ -635,3 +635,9 @@ body {
 .contact-load-pending [data-load]:not([data-load-started]) {
   visibility: hidden;
 }
+
+/* Composer frame and its divider lines stay invisible until the load draws them */
+.contact-load-pending [data-load-frame]:not([data-load-started]),
+.contact-load-pending [data-load-line]:not([data-load-started]) {
+  border-color: transparent;
+}

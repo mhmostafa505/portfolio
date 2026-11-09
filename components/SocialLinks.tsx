@@ -15,6 +15,7 @@ const SocialLinks = () => {
         <Link
           href="https://github.com/mhmostafa505"
           target="_blank"
+          data-cursor="pointer"
           className="hover:scale-135 hover:text-primary-purple transition-all duration-200 ease-in-out opacity-0 animate-[slide-in-left_0.5s_ease-out_forwards]"
           style={{ animationDelay: "400ms" }}
         >
@@ -23,6 +24,7 @@ const SocialLinks = () => {
         <Link
           href="mailto:mhmostafa505@gmail.com"
           target="_blank"
+          data-cursor="pointer"
           className="hover:scale-135 hover:text-primary-yellow transition-all duration-200 ease-in-out opacity-0 animate-[slide-in-left_0.5s_ease-out_forwards]"
           style={{ animationDelay: "550ms" }}
         >
@@ -31,6 +33,7 @@ const SocialLinks = () => {
         <Link
           href="https://t.me/ZonseWhakamateBegraben"
           target="_blank"
+          data-cursor="pointer"
           className="hover:scale-135 hover:text-primary-hover transition-all duration-200 ease-in-out opacity-0 animate-[slide-in-left_0.5s_ease-out_forwards]"
           style={{ animationDelay: "700ms" }}
         >
@@ -39,6 +42,7 @@ const SocialLinks = () => {
         <Link
           href="https://discord.com/users/whakamate52"
           target="_blank"
+          data-cursor="pointer"
           className="hover:scale-135 hover:text-primary-purple transition-all duration-200 ease-in-out opacity-0 animate-[slide-in-left_0.5s_ease-out_forwards]"
           style={{ animationDelay: "850ms" }}
         >

@@ -20,6 +20,7 @@ import {
 } from "@/content/contactMeContents";
 import { FiAlertCircle, FiCheck, FiCopy, FiMail } from "react-icons/fi";
 import { FaTelegramPlane } from "react-icons/fa";
+import ContactMeComposerHeader from "./ContactMeComposerHeader";
 
 const pills = ["#Gmail", "#Message", "#Telegram"];
 
@@ -63,6 +64,13 @@ const ContactMe = () => {
 
   const messageLength = values.message.length;
 
+  // How many of the 4 steps are finished (drives the progress in the Composer header)
+  const unlockedSteps = [0, 1, 2, 3].filter((step) =>
+    isStepUnlocked(step),
+  ).length;
+  const doneSteps =
+    unlockedSteps - 1 + (unlockedSteps === 4 && values.message.trim() ? 1 : 0);
+
   // Small icon inside the "reach me" input: tells what was detected
   const reachIcon =
     reachKind === "email" ? (
@@ -95,7 +103,7 @@ const ContactMe = () => {
     <section
       id="contact"
       ref={setContactRef}
-      className="contact-load-pending relative mt-10 mb-40 scroll-mt-34"
+      className="contact-load-pending relative mt-10 mb-40 scroll-mt-30"
     >
       {/* Title and Pills */}
       <SectionHeader
@@ -132,117 +140,138 @@ const ContactMe = () => {
           </label>
         </div>
 
-        {/* Sentence: name + email/telegram */}
-        <div className="text-xl leading-[2.4] sm:text-2xl sm:leading-[2.4]">
-          {/* Step 1: name */}
-          <span data-load className={stepClass(0)}>
-            Hi, I&apos;m{" "}
-            <ContactMeAutoInput
-              value={values.name}
-              placeholder={CONTACT_PLACEHOLDERS.name}
-              colorClass={CONTACT_NAME_STYLE}
-              onChange={handleNameChange}
-              maxLength={CONTACT_LIMITS.name.max}
-              disabled={isLocked(0)}
-              dir="auto"
-              autoComplete="off"
-              spellCheck={false}
-              aria-label="Your name"
-            />
-          </span>{" "}
-          {/* Step 2: email or telegram (icon shows what was detected) */}
-          <span data-load className={stepClass(1)}>
-            and you can reach me at{" "}
-            <ContactMeAutoInput
-              value={values.reach}
-              placeholder={CONTACT_PLACEHOLDERS.reach}
-              colorClass={CONTACT_REACH_STYLES[reachKind]}
-              paddingClass="pl-[30px] pr-1.5"
-              icon={reachIcon}
-              onChange={handleReachChange}
-              maxLength={CONTACT_LIMITS.reach.max}
-              disabled={isLocked(1)}
-              dir="ltr"
-              autoComplete="off"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              aria-label="Your email or Telegram username"
-              aria-invalid={reachKind === "invalid"}
-            />{" "}
-            .
-          </span>{" "}
-          {/* Step 3: topic (the three options are words inside the sentence) */}
-          <div data-load className={stepClass(2)}>
-            I&apos;d like to talk about{" "}
-            <span role="group" aria-label="What would you like to talk about?">
-              {CONTACT_TOPICS.map((topic, index) => {
-                const isSelected = topic.id === values.topicId;
+        {/* Composer window: header + body + footer */}
+        <div
+          data-load-frame
+          className="rounded-2xl border border-primary-white/20"
+        >
+          {/* Header: title + progress */}
+          <ContactMeComposerHeader doneSteps={doneSteps} />
 
-                return (
-                  <Fragment key={topic.id}>
-                    {index > 0 && (
-                      <span className="px-1 text-primary-white/30">/</span>
-                    )}
-                    <button
-                      type="button"
-                      data-cursor="pointer"
-                      aria-pressed={isSelected}
-                      disabled={isLocked(2)}
-                      onClick={() => handleTopicSelect(topic.id)}
-                      className={`cursor-pointer border-b px-[0.15em] leading-[1.7] transition-[opacity,color,background-color] duration-200 disabled:cursor-default ${
-                        isSelected ? topic.wordActiveClass : topic.wordIdleClass
-                      } ${values.topicId && !isSelected ? "opacity-35" : ""}`}
-                    >
-                      {topic.label}
-                    </button>
-                  </Fragment>
-                );
-              })}
-            </span>{" "}
-            .
+          {/* Body */}
+          <div className="px-5 pt-6 pb-4 sm:px-8 sm:pt-7">
+            {/* Sentence: name + email/telegram */}
+            <div className="text-xl leading-[2.4] sm:text-2xl sm:leading-[2.4]">
+              {/* Step 1: name */}
+              <span data-load className={stepClass(0)}>
+                Hi, I&apos;m{" "}
+                <ContactMeAutoInput
+                  value={values.name}
+                  placeholder={CONTACT_PLACEHOLDERS.name}
+                  colorClass={CONTACT_NAME_STYLE}
+                  onChange={handleNameChange}
+                  maxLength={CONTACT_LIMITS.name.max}
+                  disabled={isLocked(0)}
+                  dir="auto"
+                  autoComplete="off"
+                  spellCheck={false}
+                  aria-label="Your name"
+                />
+              </span>{" "}
+              {/* Step 2: email or telegram (icon shows what was detected) */}
+              <span data-load className={stepClass(1)}>
+                and you can reach me at{" "}
+                <ContactMeAutoInput
+                  value={values.reach}
+                  placeholder={CONTACT_PLACEHOLDERS.reach}
+                  colorClass={CONTACT_REACH_STYLES[reachKind]}
+                  paddingClass="pl-[30px] pr-1.5"
+                  icon={reachIcon}
+                  onChange={handleReachChange}
+                  maxLength={CONTACT_LIMITS.reach.max}
+                  disabled={isLocked(1)}
+                  dir="ltr"
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  aria-label="Your email or Telegram username"
+                  aria-invalid={reachKind === "invalid"}
+                />{" "}
+                .
+              </span>{" "}
+              {/* Step 3: topic (the three options are words inside the sentence) */}
+              <div data-load className={stepClass(2)}>
+                I&apos;d like to talk about{" "}
+                <span
+                  role="group"
+                  aria-label="What would you like to talk about?"
+                >
+                  {CONTACT_TOPICS.map((topic, index) => {
+                    const isSelected = topic.id === values.topicId;
+
+                    return (
+                      <Fragment key={topic.id}>
+                        {index > 0 && (
+                          <span className="px-1 text-primary-white/30">/</span>
+                        )}
+                        <button
+                          type="button"
+                          data-cursor="pointer"
+                          aria-pressed={isSelected}
+                          disabled={isLocked(2)}
+                          onClick={() => handleTopicSelect(topic.id)}
+                          className={`cursor-pointer border-b px-[0.15em] leading-[1.7] transition-[opacity,color,background-color] duration-200 disabled:cursor-default ${
+                            isSelected
+                              ? topic.wordActiveClass
+                              : topic.wordIdleClass
+                          } ${values.topicId && !isSelected ? "opacity-35" : ""}`}
+                        >
+                          {topic.label}
+                        </button>
+                      </Fragment>
+                    );
+                  })}
+                </span>{" "}
+                .
+              </div>
+            </div>
+
+            {/* Step 4: message + send */}
+            <div className={`mt-9 ${stepClass(3)}`}>
+              <p
+                id="contact-message-label"
+                data-load
+                className="mb-3 text-[22px] sm:text-2xl"
+              >
+                Here&apos;s the full story:
+              </p>
+
+              <textarea
+                id="contact-message"
+                data-load
+                aria-labelledby="contact-message-label"
+                ref={messageRef}
+                value={values.message}
+                onChange={handleMessageChange}
+                maxLength={CONTACT_LIMITS.message.max}
+                disabled={isLocked(3)}
+                placeholder={CONTACT_PLACEHOLDERS.message}
+                dir="auto"
+                rows={5}
+                autoComplete="off"
+                className="block w-full resize-none overflow-x-hidden rounded-xl border border-primary-white/15 bg-transparent px-4.5 py-4 text-lg leading-relaxed text-[#fffcd4] outline-none transition-colors wrap-anywhere placeholder:text-primary-white/35 focus:border-primary-yellow disabled:cursor-default disabled:opacity-100 disabled:[-webkit-text-fill-color:currentColor] disabled:placeholder:[-webkit-text-fill-color:color-mix(in_srgb,var(--color-primary-white)_35%,transparent)] not-placeholder-shown:border-primary-yellow"
+              />
+
+              {/* Character counter (turns yellow near the limit) */}
+              <div
+                data-load
+                className={`mt-2.5 mr-2 text-right text-xs ${
+                  messageLength >= CONTACT_LIMITS.message.max * 0.9
+                    ? "text-primary-yellow"
+                    : "text-primary-white/40"
+                }`}
+              >
+                {messageLength} / {CONTACT_LIMITS.message.max}
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Step 4: message + send */}
-        <div className={`mt-9 ${stepClass(3)}`}>
-          <p
-            id="contact-message-label"
-            data-load
-            className="mb-3 text-[22px] sm:text-2xl"
-          >
-            Here&apos;s the full story:
-          </p>
-
-          <textarea
-            id="contact-message"
-            data-load
-            aria-labelledby="contact-message-label"
-            ref={messageRef}
-            value={values.message}
-            onChange={handleMessageChange}
-            maxLength={CONTACT_LIMITS.message.max}
-            disabled={isLocked(3)}
-            placeholder={CONTACT_PLACEHOLDERS.message}
-            dir="auto"
-            rows={5}
-            autoComplete="off"
-            className="block w-full resize-none overflow-x-hidden rounded-xl border border-primary-white/15 bg-transparent px-4.5 py-4 text-lg leading-relaxed text-[#fffcd4] outline-none transition-colors wrap-anywhere placeholder:text-primary-white/35 focus:border-primary-yellow disabled:cursor-default disabled:opacity-100 disabled:[-webkit-text-fill-color:currentColor] disabled:placeholder:[-webkit-text-fill-color:color-mix(in_srgb,var(--color-primary-white)_35%,transparent)] not-placeholder-shown:border-primary-yellow"
-          />
-
-          {/* Character counter (turns yellow near the limit) */}
+          {/* Footer: signature + send */}
           <div
-            data-load
-            className={`mt-2.5 mr-2 text-right text-xs ${
-              messageLength >= CONTACT_LIMITS.message.max * 0.9
-                ? "text-primary-yellow"
-                : "text-primary-white/40"
-            }`}
+            data-load-line="top"
+            className={`flex flex-wrap items-center justify-between gap-3 border-t border-primary-white/15 px-4.5 py-4.5 sm:px-6 ${stepClass(3)}`}
           >
-            {messageLength} / {CONTACT_LIMITS.message.max}
-          </div>
-
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
             <span
               data-load
               className="min-w-0 text-lg text-primary-white/60 wrap-anywhere"
